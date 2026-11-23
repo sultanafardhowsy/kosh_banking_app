@@ -1,0 +1,585 @@
+// Kosh — Digital Banking Management System
+// Money is ALWAYS stored as BigInt in paisa (1 BDT = 100 paisa). Never floats.
+// Rates/percentages are stored as basis points (1% = 100 bps).
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooled (Neon -pooler host)
+  directUrl = env("DIRECT_URL") // direct, used by migrations
+}
+
+// ───────────────────────────── Enums ─────────────────────────────
+
+enum Role {
+  ADMIN
+  STAFF
+  CUSTOMER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+enum AccountType {
+  SAVINGS
+  CURRENT
+  BUSINESS
+}
+
+enum AccountStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+  LOAN_DISBURSEMENT
+  LOAN_REPAYMENT
+  CARD_PAYMENT
+  REVERSAL
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
+enum LedgerDirection {
+  DEBIT
+  CREDIT
+}
+
+enum RequestType {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum LoanType {
+  PERSONAL
+  HOME
+  AUTO
+  EDUCATION
+  BUSINESS
+}
+
+enum EmploymentStatus {
+  SALARIED
+  SELF_EMPLOYED
+  BUSINESS_OWNER
+  STUDENT
+  UNEMPLOYED
+  RETIRED
+}
+
+enum LoanStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  ACTIVE
+  COMPLETED
+}
+
+enum InstallmentStatus {
+  DUE
+  PAID
+  OVERDUE
+}
+
+enum CardNetwork {
+  VISA
+  MASTERCARD
+}
+
+enum CardStatus {
+  REQUESTED
+  ACTIVE
+  FROZEN
+  BLOCKED
+  REJECTED
+}
+
+enum NotificationType {
+  TRANSFER_SENT
+  TRANSFER_RECEIVED
+  REQUEST_APPROVED
+  REQUEST_REJECTED
+  LOAN_UPDATE
+  LOAN_APPROVED
+  LOAN_REJECTED
+  INSTALLMENT_DUE
+  ACCOUNT_UPDATE
+  CARD_UPDATE
+  SECURITY
+  SYSTEM
+  REVIEW_QUEUE
+}
+
+enum EmailStatus {
+  SENT // accepted by the email provider
+  FAILED // provider returned an error
+  LOGGED // no provider configured — kept in the in-app email log only
+}
+
+enum SecurityEventType {
+  PIN_FAILED
+  PIN_LOCKED
+  PIN_CHANGED
+}
+
+// ─────────────────────── Users & Better Auth ───────────────────────
+
+model User {
+  id                 String     @id @default(cuid())
+  name               String
+  email              String     @unique
+  emailVerified      Boolean    @default(false)
+  image              String?
+  role               Role       @default(CUSTOMER)
+  status             UserStatus @default(ACTIVE)
+  isVerified         Boolean    @default(false) // KYC verified by staff/admin
+  emailNotifications Boolean    @default(true) // user preference
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // Better Auth
+  sessions     Session[]
+  authAccounts AuthAccount[]
+
+  // Domain
+  profile          CustomerProfile?           @relation("ProfileOwner")
+  verifiedProfiles CustomerProfile[]          @relation("ProfileVerifier")
+  accounts         Account[]                  @relation("AccountOwner")
+  createdAccounts  Account[]                  @relation("AccountCreator")
+  initiatedTxns    Transaction[]              @relation("TxnInitiator")
+  flaggedTxns      Transaction[]              @relation("TxnFlagger")
+  requestsMade     DepositWithdrawalRequest[] @relation("RequestRequester")
+  requestsReviewed DepositWithdrawalRequest[] @relation("RequestReviewer")
+  loans            Loan[]                     @relation("LoanBorrower")
+  loansForwarded   Loan[]                     @relation("LoanForwarder")
+  loansDecided     Loan[]                     @relation("LoanApprover")
+  loanNotes        LoanNote[]
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+  settingsUpdates  BankSettings[]
+  cards            Card[]                     @relation("CardOwner")
+  cardsApproved    Card[]                     @relation("CardApprover")
+  securityEvents   SecurityEvent[]
+  emailLogs        EmailLog[]
+  otpChallenges    OtpChallenge[]
+
+  @@index([role, status])
+  @@map("users")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/// Better Auth "account" (login credentials/providers). Renamed so it does not
+/// clash with the bank `Account` model. The bcrypt password hash lives here.
+model AuthAccount {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("auth_accounts")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verifications")
+}
+
+model CustomerProfile {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation("ProfileOwner", fields: [userId], references: [id], onDelete: Cascade)
+  phone        String?
+  address      String?
+  nid          String? // fake national ID for demo only
+  dateOfBirth  DateTime?
+  verifiedById String?
+  verifiedBy   User?     @relation("ProfileVerifier", fields: [verifiedById], references: [id])
+  verifiedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("customer_profiles")
+}
+
+// ───────────────────────────── Banking ─────────────────────────────
+
+model Account {
+  id                 String        @id @default(cuid())
+  accountNumber      String        @unique // e.g. 1001 2345 6789 (stored without spaces)
+  userId             String
+  user               User          @relation("AccountOwner", fields: [userId], references: [id])
+  type               AccountType
+  balance            BigInt        @default(0) // paisa
+  status             AccountStatus @default(ACTIVE)
+  nickname           String?
+  transactionPinHash String?
+  pinAttempts        Int           @default(0)
+  pinLockedUntil     DateTime?
+  dailyTransferLimit BigInt? // overrides BankSettings when set
+  maxSingleTxn       BigInt? // overrides BankSettings when set
+  createdById        String?
+  createdBy          User?         @relation("AccountCreator", fields: [createdById], references: [id])
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  sentTxns       Transaction[]              @relation("TxnSender")
+  receivedTxns   Transaction[]              @relation("TxnReceiver")
+  ledgerEntries  LedgerEntry[]
+  requests       DepositWithdrawalRequest[]
+  loans          Loan[]
+  cards          Card[]
+  securityEvents SecurityEvent[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("accounts")
+}
+
+model Transaction {
+  id                String            @id @default(cuid())
+  reference         String            @unique // TXN-20261121-8F3K2A
+  type              TransactionType
+  amount            BigInt // paisa, always positive
+  fee               BigInt            @default(0)
+  status            TransactionStatus @default(PENDING)
+  senderAccountId   String?
+  senderAccount     Account?          @relation("TxnSender", fields: [senderAccountId], references: [id])
+  receiverAccountId String?
+  receiverAccount   Account?          @relation("TxnReceiver", fields: [receiverAccountId], references: [id])
+  description       String?
+  idempotencyKey    String?           @unique
+  isFlagged         Boolean           @default(false)
+  flagReason        String?
+  flaggedById       String?
+  flaggedBy         User?             @relation("TxnFlagger", fields: [flaggedById], references: [id])
+  flaggedAt         DateTime?
+  flagResolvedAt    DateTime?
+  /// For a REVERSAL txn: points at the original. Original is marked REVERSED.
+  reversedTxnId     String?           @unique
+  reversedTxn       Transaction?      @relation("Reversal", fields: [reversedTxnId], references: [id])
+  reversal          Transaction?      @relation("Reversal")
+  cardId            String?
+  card              Card?             @relation(fields: [cardId], references: [id])
+  merchant          String?
+  initiatedById     String
+  initiatedBy       User              @relation("TxnInitiator", fields: [initiatedById], references: [id])
+  createdAt         DateTime          @default(now())
+
+  ledgerEntries   LedgerEntry[]
+  request         DepositWithdrawalRequest?
+  disbursedLoan   Loan?                     @relation("LoanDisbursement")
+  paidInstallment LoanInstallment?
+
+  @@index([senderAccountId, createdAt])
+  @@index([receiverAccountId, createdAt])
+  @@index([type, status])
+  @@index([isFlagged])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+/// Double-entry style record: each money movement writes one row per affected
+/// account. Statements are built from an account's ledger entries.
+model LedgerEntry {
+  id            String          @id @default(cuid())
+  transactionId String
+  transaction   Transaction     @relation(fields: [transactionId], references: [id])
+  accountId     String
+  account       Account         @relation(fields: [accountId], references: [id])
+  direction     LedgerDirection
+  amount        BigInt
+  balanceAfter  BigInt
+  createdAt     DateTime        @default(now())
+
+  @@index([accountId, createdAt])
+  @@index([transactionId])
+  @@map("ledger_entries")
+}
+
+model DepositWithdrawalRequest {
+  id            String        @id @default(cuid())
+  accountId     String
+  account       Account       @relation(fields: [accountId], references: [id])
+  type          RequestType
+  amount        BigInt
+  description   String?
+  status        RequestStatus @default(PENDING)
+  requestedById String
+  requestedBy   User          @relation("RequestRequester", fields: [requestedById], references: [id])
+  reviewedById  String?
+  reviewedBy    User?         @relation("RequestReviewer", fields: [reviewedById], references: [id])
+  reviewNote    String?
+  reviewedAt    DateTime?
+  transactionId String?       @unique
+  transaction   Transaction?  @relation(fields: [transactionId], references: [id])
+  createdAt     DateTime      @default(now())
+
+  @@index([status, createdAt])
+  @@index([accountId])
+  @@map("deposit_withdrawal_requests")
+}
+
+// ───────────────────────────── Loans ─────────────────────────────
+
+model Loan {
+  id                String           @id @default(cuid())
+  userId            String
+  user              User             @relation("LoanBorrower", fields: [userId], references: [id])
+  accountId         String // disbursement + repayment account
+  account           Account          @relation(fields: [accountId], references: [id])
+  loanType          LoanType
+  principal         BigInt
+  interestRateBps   Int // annual rate, 1250 = 12.50%
+  durationMonths    Int
+  emiAmount         BigInt?
+  totalPayable      BigInt?
+  monthlyIncome     BigInt
+  employmentStatus  EmploymentStatus
+  description       String?
+  status            LoanStatus       @default(PENDING)
+  remainingBalance  BigInt           @default(0)
+  forwardedById     String?
+  forwardedBy       User?            @relation("LoanForwarder", fields: [forwardedById], references: [id])
+  forwardedAt       DateTime?
+  approvedById      String?
+  approvedBy        User?            @relation("LoanApprover", fields: [approvedById], references: [id])
+  decidedAt         DateTime?
+  rejectionReason   String?
+  disbursementTxnId String?          @unique
+  disbursementTxn   Transaction?     @relation("LoanDisbursement", fields: [disbursementTxnId], references: [id])
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  installments LoanInstallment[]
+  notes        LoanNote[]
+
+  @@index([status])
+  @@index([userId])
+  @@map("loans")
+}
+
+model LoanInstallment {
+  id            String            @id @default(cuid())
+  loanId        String
+  loan          Loan              @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  installmentNo Int
+  dueDate       DateTime
+  amountDue     BigInt
+  principalPart BigInt
+  interestPart  BigInt
+  status        InstallmentStatus @default(DUE)
+  paidTxnId     String?           @unique
+  paidTxn       Transaction?      @relation(fields: [paidTxnId], references: [id])
+  paidAt        DateTime?
+
+  @@unique([loanId, installmentNo])
+  @@index([status, dueDate])
+  @@map("loan_installments")
+}
+
+model LoanNote {
+  id        String   @id @default(cuid())
+  loanId    String
+  loan      Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  note      String
+  createdAt DateTime @default(now())
+
+  @@index([loanId])
+  @@map("loan_notes")
+}
+
+// ─────────────────────── Settings, logs, misc ───────────────────────
+
+/// Exactly one row (id = 1).
+model BankSettings {
+  id                    Int      @id @default(1)
+  dailyTransferLimit    BigInt // paisa
+  maxSingleTransaction  BigInt // paisa
+  minimumBalance        BigInt // paisa
+  transferFeeFlat       BigInt // paisa
+  transferFeePercentBps Int // 50 = 0.50%
+  transferFeeMax        BigInt? // optional fee cap
+  otpThreshold          BigInt? // 2FA above this amount (bonus)
+  updatedById           String?
+  updatedBy             User?    @relation(fields: [updatedById], references: [id])
+  updatedAt             DateTime @updatedAt
+
+  @@map("bank_settings")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  isRead    Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead, createdAt])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  actor     User     @relation(fields: [actorId], references: [id])
+  action    String // e.g. ACCOUNT_FROZEN, LOAN_APPROVED
+  entity    String // e.g. Account, Loan
+  entityId  String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId, createdAt])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+/// PIN failures etc. — feeds the "≥3 failed PIN attempts in 1 hour" fraud rule.
+model SecurityEvent {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id])
+  accountId String?
+  account   Account?          @relation(fields: [accountId], references: [id])
+  type      SecurityEventType
+  createdAt DateTime          @default(now())
+
+  @@index([accountId, type, createdAt])
+  @@map("security_events")
+}
+
+// ───────────────────── Bonus: virtual cards (simulated) ─────────────────────
+
+model Card {
+  id               String      @id @default(cuid())
+  accountId        String
+  account          Account     @relation(fields: [accountId], references: [id])
+  userId           String
+  user             User        @relation("CardOwner", fields: [userId], references: [id])
+  cardNumberMasked String // "4000 •••• •••• 1234" — full number is never stored
+  last4            String
+  cardholderName   String
+  expiryMonth      Int
+  expiryYear       Int
+  network          CardNetwork @default(VISA)
+  status           CardStatus  @default(REQUESTED)
+  dailySpendLimit  BigInt
+  approvedById     String?
+  approvedBy       User?       @relation("CardApprover", fields: [approvedById], references: [id])
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("cards")
+}
+
+/// Every email Kosh tried to send (or logged because no provider is configured).
+model EmailLog {
+  id               String            @id @default(cuid())
+  userId           String?
+  user             User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  toAddress        String // where it was actually sent (may be the demo redirect inbox)
+  originalTo       String // the user's own address
+  subject          String
+  html             String
+  notificationType NotificationType?
+  status           EmailStatus
+  provider         String // "resend" | "log"
+  providerId       String?
+  error            String?
+  createdAt        DateTime          @default(now())
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@map("email_logs")
+}
+
+// ── Two-factor (bonus) ───────────────────────────────
+enum OtpPurpose {
+  TRANSFER // transfer at/above BankSettings.otpThreshold
+  PIN_CHANGE // changing an existing transaction PIN
+  REVERSAL // admin reverses a transaction
+  SETTINGS // admin changes bank settings
+}
+
+/// A one-time code emailed for a sensitive operation. Only an HMAC of the code is stored.
+/// payloadHash binds the code to one exact operation (e.g. this amount to this account).
+model OtpChallenge {
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose     OtpPurpose
+  payloadHash String
+  codeHash    String
+  attempts    Int        @default(0)
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime   @default(now())
+
+  @@index([userId, createdAt])
+  @@map("otp_challenges")
+}

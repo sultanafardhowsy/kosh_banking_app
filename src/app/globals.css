@@ -1,0 +1,202 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+
+/* Dark mode is class-based (next-themes adds `.dark` to <html>) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------
+   Kosh design tokens
+   Raw values live in CSS variables so light/dark swap in one place.
+   HeroUI variables are re-pointed at the Kosh palette below.
+------------------------------------------------------------------- */
+:root,
+.light {
+  --kosh-bg: #f5f6fa;
+  --kosh-surface: #ffffff;
+  --kosh-border: #e4e7ef;
+  --kosh-text: #0b1533;
+  --kosh-muted: #5b6478;
+  --kosh-subtle: #f0f2f8;
+  --kosh-navy: #0b1533;
+  --kosh-navy-fg: #ffffff;
+  --kosh-accent: #2f6bff; /* key CTA, active tab, virtual card */
+  --kosh-accent-fg: #ffffff;
+  --kosh-accent-soft: #8eb1ff; /* accent on navy surfaces */
+  --kosh-info: #3557f5;
+  --kosh-money-in: #0b7a52;
+
+  --kosh-success-bg: #e5f6ee;
+  --kosh-success-fg: #0b6b48;
+  --kosh-pending-bg: #fef3c7;
+  --kosh-pending-fg: #8a3b0a;
+  --kosh-danger-bg: #fdecec;
+  --kosh-danger-fg: #a1161c;
+  --kosh-neutral-bg: #e8ecf6;
+  --kosh-neutral-fg: #33406a;
+
+  /* HeroUI overrides */
+  --background: var(--kosh-bg);
+  --foreground: var(--kosh-text);
+  --surface: var(--kosh-surface);
+  --surface-foreground: var(--kosh-text);
+  --surface-secondary: var(--kosh-subtle);
+  --surface-tertiary: #e9ecf5;
+  --overlay: var(--kosh-surface);
+  --overlay-foreground: var(--kosh-text);
+  --muted: var(--kosh-muted);
+  --border: var(--kosh-border);
+  --separator: var(--kosh-border);
+  --default: var(--kosh-subtle);
+  --default-foreground: var(--kosh-text);
+  --accent: var(--kosh-navy);
+  --accent-foreground: var(--kosh-navy-fg);
+  --focus: var(--kosh-info);
+  --link: var(--kosh-info);
+  --field-background: var(--kosh-surface);
+  --field-foreground: var(--kosh-text);
+  --field-border: var(--kosh-border);
+  --field-border-width: 1px;
+  --danger: #d92d35;
+  --success: #12a06b;
+  --warning: #f2a516;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --kosh-bg: #0a0f1e;
+  --kosh-surface: #111a2e;
+  --kosh-border: #22304b;
+  --kosh-text: #eef2fb;
+  --kosh-muted: #9aa6bf;
+  --kosh-subtle: #18233d;
+  --kosh-navy: #1a2a5e;
+  --kosh-navy-fg: #ffffff;
+  --kosh-info: #a9b8ff;
+  --kosh-money-in: #4ade9a;
+
+  --kosh-success-bg: rgba(74, 222, 154, 0.14);
+  --kosh-success-fg: #6ee7b7;
+  --kosh-pending-bg: rgba(251, 191, 36, 0.14);
+  --kosh-pending-fg: #fcd34d;
+  --kosh-danger-bg: rgba(248, 113, 113, 0.14);
+  --kosh-danger-fg: #fca5a5;
+  --kosh-neutral-bg: rgba(169, 184, 255, 0.14);
+  --kosh-neutral-fg: #c7d2fe;
+
+  --background: var(--kosh-bg);
+  --foreground: var(--kosh-text);
+  --surface: var(--kosh-surface);
+  --surface-foreground: var(--kosh-text);
+  --surface-secondary: var(--kosh-subtle);
+  --surface-tertiary: #1e2a47;
+  --overlay: var(--kosh-surface);
+  --overlay-foreground: var(--kosh-text);
+  --muted: var(--kosh-muted);
+  --border: var(--kosh-border);
+  --separator: var(--kosh-border);
+  --default: var(--kosh-subtle);
+  --default-foreground: var(--kosh-text);
+  --accent: #3557f5;
+  --accent-foreground: #ffffff;
+  --focus: var(--kosh-info);
+  --link: var(--kosh-info);
+  --field-background: var(--kosh-subtle);
+  --field-foreground: var(--kosh-text);
+  --field-border: var(--kosh-border);
+}
+
+/* Expose tokens as Tailwind utilities: bg-kosh-surface, text-kosh-muted, ... */
+@theme inline {
+  --color-kosh-bg: var(--kosh-bg);
+  --color-kosh-surface: var(--kosh-surface);
+  --color-kosh-border: var(--kosh-border);
+  --color-kosh-text: var(--kosh-text);
+  --color-kosh-muted: var(--kosh-muted);
+  --color-kosh-subtle: var(--kosh-subtle);
+  --color-kosh-navy: var(--kosh-navy);
+  --color-kosh-navy-fg: var(--kosh-navy-fg);
+  --color-kosh-accent: var(--kosh-accent);
+  --color-kosh-accent-fg: var(--kosh-accent-fg);
+  --color-kosh-accent-soft: var(--kosh-accent-soft);
+  --color-kosh-info: var(--kosh-info);
+  --color-kosh-money-in: var(--kosh-money-in);
+
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk Variable", "Inter Variable", ui-sans-serif, sans-serif;
+
+  --radius-card: 20px;
+  --radius-btn: 12px;
+}
+
+html,
+body {
+  background: var(--kosh-bg);
+  color: var(--kosh-text);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* All money uses tabular figures */
+.amount {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-display);
+}
+
+/* App buttons: 12px radius (landing page uses full pills) */
+.button {
+  border-radius: var(--radius-btn);
+}
+
+/* Masked PIN: hide digits, show a dot on filled slots */
+.pin-masked [data-slot="input-otp-slot-value"] {
+  display: none;
+}
+.pin-masked [data-slot="input-otp-slot"][data-filled]::after {
+  content: "";
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 9999px;
+  background: var(--kosh-text);
+}
+
+/* Chart series (validated: adjacent + all-pairs CVD ≥ 9, normal-vision ≥ 24, both modes) */
+:root,
+.light {
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --chart-grid: #eceef4;
+}
+.dark {
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --chart-grid: #1e2a44;
+}
+
+/* Landing hero: the one orchestrated moment — cards drift in once on load */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-float > * {
+    animation: hero-in 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .hero-float > *:nth-child(2) {
+    animation-delay: 140ms;
+  }
+}
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+}
