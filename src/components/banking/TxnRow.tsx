@@ -53,7 +53,13 @@ export function TxnRow({ t, href = true }: { t: CustomerTxn; href?: boolean }) {
         <Money
           value={t.net}
           direction={t.direction === "internal" ? undefined : t.direction}
-          className={cn("text-sm font-semibold", t.status === "REVERSED" && "line-through opacity-60")}
+          className={cn(
+            "text-sm font-semibold",
+            // Only settled money gets the credit colour; pending/failed stay neutral (≥7:1).
+            (t.status === "PENDING" || t.status === "FAILED") && "text-kosh-money-pending",
+            t.status === "FAILED" && "line-through",
+            t.status === "REVERSED" && "line-through opacity-60",
+          )}
         />
         {t.status !== "COMPLETED" ? (
           <div className="mt-0.5">

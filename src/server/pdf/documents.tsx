@@ -6,10 +6,11 @@ import { formatAmount, type MoneyInput } from "@/lib/money";
  * Server-rendered PDFs (receipts & statements). Built-in Helvetica has no ৳
  * glyph, so PDFs print "BDT". All data is simulated — every page says so.
  */
-const NAVY = "#0B1533";
-const MUTED = "#5B6478";
-const BORDER = "#E4E7EF";
-const BLUE = "#2F6BFF";
+const NAVY = "#0F172A";
+const BRAND = "#0A3A63";
+const MUTED = "#475569";
+const BORDER = "#E2E8F0";
+const BLUE = "#00A3A1";
 
 const s = StyleSheet.create({
   page: { padding: 40, fontSize: 10, fontFamily: "Helvetica", color: NAVY },
@@ -19,7 +20,7 @@ const s = StyleSheet.create({
   tag: { fontSize: 8, color: MUTED, textAlign: "right" },
   title: { fontSize: 14, fontFamily: "Helvetica-Bold", marginBottom: 4 },
   muted: { color: MUTED },
-  hero: { backgroundColor: NAVY, color: "#FFFFFF", borderRadius: 8, padding: 18, marginVertical: 16 },
+  hero: { backgroundColor: BRAND, color: "#FFFFFF", borderRadius: 8, padding: 18, marginVertical: 16 },
   heroAmount: { fontSize: 26, fontFamily: "Helvetica-Bold", marginTop: 4 },
   row: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: BORDER },
   label: { color: MUTED },
@@ -80,9 +81,9 @@ export async function renderReceipt(r: ReceiptData) {
         <Text style={s.title}>{r.typeLabel}</Text>
         <Text style={s.muted}>{dt(r.createdAt)}</Text>
         <View style={s.hero}>
-          <Text style={{ fontSize: 9, color: "#C7D2FE" }}>Amount</Text>
+          <Text style={{ fontSize: 9, color: "#9CC3EB" }}>Amount</Text>
           <Text style={s.heroAmount}>{bdt(r.amount)}</Text>
-          <Text style={{ fontSize: 9, marginTop: 6, color: "#C7D2FE" }}>Status: {r.status}</Text>
+          <Text style={{ fontSize: 9, marginTop: 6, color: "#9CC3EB" }}>Status: {r.status}</Text>
         </View>
         {(
           [

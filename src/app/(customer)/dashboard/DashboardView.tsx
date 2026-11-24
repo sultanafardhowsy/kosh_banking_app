@@ -95,7 +95,7 @@ export function DashboardView() {
         <section className="relative overflow-hidden rounded-[22px] bg-kosh-navy p-6 text-kosh-navy-fg sm:p-7">
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-kosh-accent/30 blur-3xl"
+            className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-kosh-brand-accent/20 blur-3xl"
           />
           {isLoading ? (
             <div className="space-y-4">
@@ -116,7 +116,7 @@ export function DashboardView() {
               <div className="mt-6 flex flex-wrap gap-2">
                 <Link
                   href="/transfer"
-                  className="inline-flex h-10 items-center gap-2 rounded-xl bg-kosh-accent px-4 text-sm font-semibold text-kosh-accent-fg hover:brightness-110"
+                  className="inline-flex h-10 items-center gap-2 rounded-xl bg-kosh-brand-accent px-4 text-sm font-semibold text-kosh-brand-accent-fg hover:brightness-110"
                 >
                   <ArrowLeftRight className="size-4" /> Send money
                 </Link>

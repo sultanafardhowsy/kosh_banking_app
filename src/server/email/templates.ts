@@ -18,21 +18,21 @@ export function renderEmail(opts: { name: string; title: string; body: string; c
 
   const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(opts.title)}</title></head>
-<body style="margin:0;padding:0;background:#F5F6FA;font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif;color:#0B1533;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F5F6FA;padding:32px 12px;">
+<body style="margin:0;padding:0;background:#F8FAFC;font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif;color:#0F172A;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F8FAFC;padding:32px 12px;">
 <tr><td align="center">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:#FFFFFF;border:1px solid #E4E7EF;border-radius:20px;overflow:hidden;">
-    <tr><td style="background:#0B1533;padding:22px 28px;">
-      <span style="font-size:20px;font-weight:700;color:#FFFFFF;letter-spacing:-0.02em;">Kosh<span style="color:#2F6BFF;">.</span></span>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:20px;overflow:hidden;">
+    <tr><td style="background:#0A3A63;padding:22px 28px;">
+      <span style="font-size:20px;font-weight:700;color:#FFFFFF;letter-spacing:-0.02em;">Kosh<span style="color:#2DD4BF;">.</span></span>
     </td></tr>
     <tr><td style="padding:28px 28px 8px;">
-      <p style="margin:0 0 6px;font-size:14px;color:#5B6478;">Hi ${esc(firstName)},</p>
-      <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0B1533;">${esc(opts.title)}</h1>
-      <p style="margin:0 0 22px;font-size:15px;line-height:1.6;color:#33406A;">${esc(opts.body)}</p>
-      ${cta ? `<a href="${esc(cta)}" style="display:inline-block;background:#2F6BFF;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:14px;padding:12px 20px;border-radius:12px;">${esc(label)}</a>` : ""}
+      <p style="margin:0 0 6px;font-size:14px;color:#475569;">Hi ${esc(firstName)},</p>
+      <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F172A;">${esc(opts.title)}</h1>
+      <p style="margin:0 0 22px;font-size:15px;line-height:1.6;color:#334155;">${esc(opts.body)}</p>
+      ${cta ? `<a href="${esc(cta)}" style="display:inline-block;background:#0F4C81;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:14px;padding:12px 20px;border-radius:12px;">${esc(label)}</a>` : ""}
     </td></tr>
     <tr><td style="padding:24px 28px 26px;">
-      <p style="margin:0;font-size:12px;line-height:1.6;color:#5B6478;">You're receiving this because email notifications are on for your Kosh profile. Turn them off any time on the Notifications page.<br>Kosh is a simulated bank built for an assessment project — no real money is involved.</p>
+      <p style="margin:0;font-size:12px;line-height:1.6;color:#475569;">You're receiving this because email notifications are on for your Kosh profile. Turn them off any time on the Notifications page.<br>Kosh is a simulated bank built for an assessment project — no real money is involved.</p>
     </td></tr>
   </table>
 </td></tr>

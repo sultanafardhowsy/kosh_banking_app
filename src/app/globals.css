@@ -5,104 +5,186 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ------------------------------------------------------------------
-   Kosh design tokens
-   Raw values live in CSS variables so light/dark swap in one place.
-   HeroUI variables are re-pointed at the Kosh palette below.
+   Kosh design tokens — v2 palette
+   Layer 1  --ds-*    raw palette (light in :root, dark in .dark)
+   Layer 2  --kosh-*  semantic aliases used by components (unchanged names)
+   Layer 3  HeroUI    variables re-pointed at the aliases
+   Every text pairing is WCAG AA (≥4.5:1); amounts/balances ≥7:1;
+   form borders & focus ≥3:1. Ratios are vs surface unless noted.
 ------------------------------------------------------------------- */
 :root,
 .light {
-  --kosh-bg: #f5f6fa;
-  --kosh-surface: #ffffff;
-  --kosh-border: #e4e7ef;
-  --kosh-text: #0b1533;
-  --kosh-muted: #5b6478;
-  --kosh-subtle: #f0f2f8;
-  --kosh-navy: #0b1533;
-  --kosh-navy-fg: #ffffff;
-  --kosh-accent: #2f6bff; /* key CTA, active tab, virtual card */
-  --kosh-accent-fg: #ffffff;
-  --kosh-accent-soft: #8eb1ff; /* accent on navy surfaces */
-  --kosh-info: #3557f5;
-  --kosh-money-in: #0b7a52;
+  color-scheme: light;
 
-  --kosh-success-bg: #e5f6ee;
-  --kosh-success-fg: #0b6b48;
-  --kosh-pending-bg: #fef3c7;
-  --kosh-pending-fg: #8a3b0a;
-  --kosh-danger-bg: #fdecec;
-  --kosh-danger-fg: #a1161c;
-  --kosh-neutral-bg: #e8ecf6;
-  --kosh-neutral-fg: #33406a;
+  --ds-bg: #f8fafc;
+  --ds-bg-sunken: #f1f5f9;
+  --ds-surface: #ffffff;
+  --ds-surface-raised: #ffffff;
+  --ds-border: #e2e8f0;
+  --ds-border-strong: #cbd5e1;
+  --ds-border-input: #8391a7; /* 3.19:1 */
 
-  /* HeroUI overrides */
-  --background: var(--kosh-bg);
-  --foreground: var(--kosh-text);
-  --surface: var(--kosh-surface);
-  --surface-foreground: var(--kosh-text);
-  --surface-secondary: var(--kosh-subtle);
-  --surface-tertiary: #e9ecf5;
-  --overlay: var(--kosh-surface);
-  --overlay-foreground: var(--kosh-text);
-  --muted: var(--kosh-muted);
-  --border: var(--kosh-border);
-  --separator: var(--kosh-border);
-  --default: var(--kosh-subtle);
-  --default-foreground: var(--kosh-text);
-  --accent: var(--kosh-navy);
-  --accent-foreground: var(--kosh-navy-fg);
-  --focus: var(--kosh-info);
-  --link: var(--kosh-info);
-  --field-background: var(--kosh-surface);
-  --field-foreground: var(--kosh-text);
-  --field-border: var(--kosh-border);
-  --field-border-width: 1px;
-  --danger: #d92d35;
-  --success: #12a06b;
-  --warning: #f2a516;
-  --radius: 0.75rem;
+  --ds-text-primary: #0f172a; /* 17.85:1 */
+  --ds-text-secondary: #475569; /* 7.58:1 · 6.92 on sunken */
+  --ds-text-tertiary: #64748b; /* 4.76:1 — white only */
+  --ds-text-link: #1d4ed8; /* 6.70:1 */
+
+  --ds-primary: #0f4c81; /* white 8.86:1 */
+  --ds-primary-hover: #0a3a63; /* white 11.68:1 */
+  --ds-primary-active: #082c4c;
+  --ds-primary-subtle: #e7eef6;
+  --ds-on-primary: #ffffff;
+  --ds-brand-surface: #0a3a63; /* hero cards; white/60 = 5.23:1 */
+  --ds-on-brand-muted: #9cc3eb; /* 6.35:1 on brand-surface */
+
+  --ds-secondary: #007a78; /* white 5.18:1 · text 4.73 on sunken */
+  --ds-secondary-hover: #006664;
+  --ds-secondary-bright: #00a3a1; /* charts/illustration */
+  --ds-on-secondary: #ffffff;
+
+  --ds-accent: #f59e0b;
+  --ds-on-accent: #0f172a; /* 8.31:1 */
+
+  --ds-success: #047857;
+  --ds-success-subtle: #d1fae5;
+  --ds-success-text: #047857; /* 4.84:1 on subtle */
+  --ds-warning: #b45309;
+  --ds-warning-subtle: #fef3c7;
+  --ds-warning-text: #92400e; /* 6.37:1 on subtle */
+  --ds-error: #dc2626; /* white 4.83:1 */
+  --ds-error-subtle: #fee2e2;
+  --ds-error-text: #b91c1c; /* 5.30:1 on subtle */
+  --ds-info: #3b82f6; /* focus ring 3.68:1 */
+  --ds-info-subtle: #dbeafe;
+  --ds-info-text: #1d4ed8;
+  --ds-neutral-subtle: #e2e8f0;
+  --ds-neutral-text: #334155; /* 8.90:1 on subtle */
+
+  --ds-amount-positive: #065f46; /* 7.68:1 */
+  --ds-amount-negative: #991b1b; /* 8.31:1 */
+  --ds-amount-pending: #475569; /* 7.58:1 */
 }
 
 .dark {
-  --kosh-bg: #0a0f1e;
-  --kosh-surface: #111a2e;
-  --kosh-border: #22304b;
-  --kosh-text: #eef2fb;
-  --kosh-muted: #9aa6bf;
-  --kosh-subtle: #18233d;
-  --kosh-navy: #1a2a5e;
+  color-scheme: dark;
+
+  --ds-bg: #0f172a;
+  --ds-bg-sunken: #273449;
+  --ds-surface: #1e293b;
+  --ds-surface-raised: #273449;
+  --ds-border: #334155;
+  --ds-border-strong: #475569;
+  --ds-border-input: #64748b; /* 3.07:1 */
+
+  --ds-text-primary: #f1f5f9; /* 13.35:1 */
+  --ds-text-secondary: #94a3b8; /* 5.71:1 · 4.89 on raised */
+  --ds-text-tertiary: #94a3b8;
+  --ds-text-link: #8bb9e8; /* 7.11:1 */
+
+  --ds-primary: #6ba6e0; /* dark text 6.93:1 */
+  --ds-primary-hover: #8bb9e8;
+  --ds-primary-active: #a9cbee;
+  --ds-primary-subtle: #16304d;
+  --ds-on-primary: #0f172a;
+  --ds-brand-surface: #173a5c; /* hero cards; white/60 = 5.28:1 */
+  --ds-on-brand-muted: #9cc3eb;
+
+  --ds-secondary: #2dd4bf; /* dark text 9.59:1 */
+  --ds-secondary-hover: #5eead4;
+  --ds-secondary-bright: #2dd4bf;
+  --ds-on-secondary: #0f172a;
+
+  --ds-accent: #fbbf24;
+  --ds-on-accent: #0f172a;
+
+  --ds-success: #34d399;
+  --ds-success-subtle: rgba(52, 211, 153, 0.14);
+  --ds-success-text: #34d399;
+  --ds-warning: #fbbf24;
+  --ds-warning-subtle: rgba(251, 191, 36, 0.14);
+  --ds-warning-text: #fbbf24;
+  --ds-error: #dc2626; /* white 4.83:1 */
+  --ds-error-subtle: rgba(248, 113, 113, 0.14);
+  --ds-error-text: #f87171;
+  --ds-info: #60a5fa;
+  --ds-info-subtle: rgba(96, 165, 250, 0.14);
+  --ds-info-text: #60a5fa;
+  --ds-neutral-subtle: #334155;
+  --ds-neutral-text: #cbd5e1;
+
+  --ds-amount-positive: #34d399; /* 7.61:1 */
+  --ds-amount-negative: #fca5a5; /* 7.71:1 */
+  --ds-amount-pending: #cbd5e1; /* 9.85:1 */
+}
+
+/* Semantic aliases (component-facing) + HeroUI mapping — same for both themes */
+:root,
+.light,
+.dark {
+  --kosh-bg: var(--ds-bg);
+  --kosh-surface: var(--ds-surface);
+  --kosh-border: var(--ds-border);
+  --kosh-text: var(--ds-text-primary);
+  --kosh-muted: var(--ds-text-secondary);
+  --kosh-subtle: var(--ds-bg-sunken);
+  --kosh-navy: var(--ds-brand-surface); /* hero cards, active nav, avatars */
   --kosh-navy-fg: #ffffff;
-  --kosh-info: #a9b8ff;
-  --kosh-money-in: #4ade9a;
+  --kosh-accent: var(--ds-secondary); /* progress, selection, unread dots */
+  --kosh-accent-fg: var(--ds-on-secondary);
+  --kosh-accent-soft: var(--ds-on-brand-muted); /* accent on brand surfaces */
+  --kosh-info: var(--ds-text-link);
+  --kosh-money-in: var(--ds-amount-positive);
+  --kosh-money-out: var(--ds-amount-negative);
+  --kosh-money-pending: var(--ds-amount-pending);
+  --kosh-primary: var(--ds-primary);
+  --kosh-primary-hover: var(--ds-primary-hover);
+  --kosh-primary-fg: var(--ds-on-primary);
+  --kosh-primary-subtle: var(--ds-primary-subtle);
+  --kosh-highlight: var(--ds-accent);
+  --kosh-highlight-fg: var(--ds-on-accent);
+  /* On brand (hero) surfaces — same in both themes; ratios vs #0A3A63 / #173A5C */
+  --kosh-brand-accent: #2dd4bf; /* CTA fill, dark text 9.59:1 · 6.27:1 vs hero */
+  --kosh-brand-accent-fg: #0f172a;
+  --kosh-on-brand-positive: #6ee7b7; /* 7.66:1 */
+  --kosh-on-brand-negative: #fca5a5; /* 6.15:1 */
 
-  --kosh-success-bg: rgba(74, 222, 154, 0.14);
-  --kosh-success-fg: #6ee7b7;
-  --kosh-pending-bg: rgba(251, 191, 36, 0.14);
-  --kosh-pending-fg: #fcd34d;
-  --kosh-danger-bg: rgba(248, 113, 113, 0.14);
-  --kosh-danger-fg: #fca5a5;
-  --kosh-neutral-bg: rgba(169, 184, 255, 0.14);
-  --kosh-neutral-fg: #c7d2fe;
+  --kosh-success-bg: var(--ds-success-subtle);
+  --kosh-success-fg: var(--ds-success-text);
+  --kosh-pending-bg: var(--ds-warning-subtle);
+  --kosh-pending-fg: var(--ds-warning-text);
+  --kosh-danger-bg: var(--ds-error-subtle);
+  --kosh-danger-fg: var(--ds-error-text);
+  --kosh-neutral-bg: var(--ds-neutral-subtle);
+  --kosh-neutral-fg: var(--ds-neutral-text);
 
-  --background: var(--kosh-bg);
-  --foreground: var(--kosh-text);
-  --surface: var(--kosh-surface);
-  --surface-foreground: var(--kosh-text);
-  --surface-secondary: var(--kosh-subtle);
-  --surface-tertiary: #1e2a47;
-  --overlay: var(--kosh-surface);
-  --overlay-foreground: var(--kosh-text);
-  --muted: var(--kosh-muted);
-  --border: var(--kosh-border);
-  --separator: var(--kosh-border);
-  --default: var(--kosh-subtle);
-  --default-foreground: var(--kosh-text);
-  --accent: #3557f5;
-  --accent-foreground: #ffffff;
-  --focus: var(--kosh-info);
-  --link: var(--kosh-info);
-  --field-background: var(--kosh-subtle);
-  --field-foreground: var(--kosh-text);
-  --field-border: var(--kosh-border);
+  /* HeroUI overrides */
+  --background: var(--ds-bg);
+  --foreground: var(--ds-text-primary);
+  --surface: var(--ds-surface);
+  --surface-foreground: var(--ds-text-primary);
+  --surface-secondary: var(--ds-bg-sunken);
+  --surface-tertiary: var(--ds-border);
+  --overlay: var(--ds-surface-raised);
+  --overlay-foreground: var(--ds-text-primary);
+  --muted: var(--ds-text-secondary);
+  --border: var(--ds-border);
+  --separator: var(--ds-border);
+  --default: var(--ds-bg-sunken);
+  --default-foreground: var(--ds-text-primary);
+  --accent: var(--ds-primary);
+  --accent-foreground: var(--ds-on-primary);
+  --focus: var(--ds-info);
+  --link: var(--ds-text-link);
+  --field-background: var(--ds-surface);
+  --field-foreground: var(--ds-text-primary);
+  --field-placeholder: var(--ds-text-tertiary);
+  --field-border: var(--ds-border-input);
+  --field-border-width: 1px;
+  --danger: var(--ds-error);
+  --danger-foreground: #ffffff;
+  --success: var(--ds-success);
+  --warning: var(--ds-warning);
+  --radius: 0.75rem;
 }
 
 /* Expose tokens as Tailwind utilities: bg-kosh-surface, text-kosh-muted, ... */
@@ -120,6 +202,24 @@
   --color-kosh-accent-soft: var(--kosh-accent-soft);
   --color-kosh-info: var(--kosh-info);
   --color-kosh-money-in: var(--kosh-money-in);
+  --color-kosh-money-out: var(--kosh-money-out);
+  --color-kosh-money-pending: var(--kosh-money-pending);
+  --color-kosh-primary: var(--kosh-primary);
+  --color-kosh-primary-hover: var(--kosh-primary-hover);
+  --color-kosh-primary-fg: var(--kosh-primary-fg);
+  --color-kosh-primary-subtle: var(--kosh-primary-subtle);
+  --color-kosh-highlight: var(--kosh-highlight);
+  --color-kosh-highlight-fg: var(--kosh-highlight-fg);
+  --color-kosh-brand-accent: var(--kosh-brand-accent);
+  --color-kosh-brand-accent-fg: var(--kosh-brand-accent-fg);
+  --color-kosh-on-brand-positive: var(--kosh-on-brand-positive);
+  --color-kosh-on-brand-negative: var(--kosh-on-brand-negative);
+  --color-kosh-success-bg: var(--kosh-success-bg);
+  --color-kosh-success-fg: var(--kosh-success-fg);
+  --color-kosh-pending-bg: var(--kosh-pending-bg);
+  --color-kosh-pending-fg: var(--kosh-pending-fg);
+  --color-kosh-danger-bg: var(--kosh-danger-bg);
+  --color-kosh-danger-fg: var(--kosh-danger-fg);
 
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Space Grotesk Variable", "Inter Variable", ui-sans-serif, sans-serif;
@@ -170,19 +270,25 @@ h3,
   background: var(--kosh-text);
 }
 
-/* Chart series (validated: adjacent + all-pairs CVD ≥ 9, normal-vision ≥ 24, both modes) */
+/* Chart series — brand navy · teal · amber (distinct in lightness + hue for CVD) */
 :root,
 .light {
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  --series-3: #1baf7a;
-  --chart-grid: #eceef4;
+  --series-1: #0f4c81;
+  --series-2: #00a3a1;
+  --series-3: #f59e0b;
+  --series-1-fg: #ffffff; /* 8.86:1 */
+  --series-2-fg: #0f172a; /* 6.11:1 */
+  --series-3-fg: #0f172a; /* 8.31:1 */
+  --chart-grid: #e2e8f0;
 }
 .dark {
-  --series-1: #3987e5;
-  --series-2: #d95926;
-  --series-3: #199e70;
-  --chart-grid: #1e2a44;
+  --series-1: #6ba6e0;
+  --series-2: #2dd4bf;
+  --series-3: #fbbf24;
+  --series-1-fg: #0f172a;
+  --series-2-fg: #0f172a;
+  --series-3-fg: #0f172a;
+  --chart-grid: #334155;
 }
 
 /* Landing hero: the one orchestrated moment — cards drift in once on load */
@@ -192,9 +298,6 @@ h3,
   }
   .hero-float > *:nth-child(2) {
     animation-delay: 140ms;
-  }
-  .hero-float > *:nth-child(3) {
-    animation-delay: 280ms;
   }
 }
 @keyframes hero-in {

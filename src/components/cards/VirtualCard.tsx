@@ -2,7 +2,7 @@ import { cn } from "@/lib/format";
 import type { CardRow } from "@/types/api";
 
 /**
- * Glassmorphism card face (indigo → teal). Shows only the masked number.
+ * Glassmorphism card face (brand navy → teal). Shows only the masked number.
  * Clearly labelled "Simulated" — never resembles a real issuer's card.
  */
 export function VirtualCard({ card, revealed = false, className, compact }: { card: CardRow; revealed?: boolean; className?: string; compact?: boolean }) {
@@ -11,15 +11,15 @@ export function VirtualCard({ card, revealed = false, className, compact }: { ca
   return (
     <div
       className={cn(
-        "relative isolate aspect-[1.586] w-full overflow-hidden rounded-[22px] p-5 text-white shadow-[0_20px_50px_-20px_rgba(53,87,245,0.55)]",
-        "bg-[linear-gradient(135deg,#3B2FD6_0%,#3557F5_45%,#22B8C8_100%)]",
+        "relative isolate aspect-[1.586] w-full overflow-hidden rounded-[22px] p-5 text-white shadow-[0_20px_50px_-20px_rgba(15,76,129,0.55)]",
+        "bg-[linear-gradient(135deg,#0A3A63_0%,#0F4C81_50%,#007A78_100%)]",
         compact && "rounded-2xl p-4",
         className,
       )}
     >
       {/* glass sheen + orbs */}
-      <div aria-hidden className="absolute -right-10 -top-16 size-48 rounded-full bg-[#5EEAD4]/40 blur-2xl" />
-      <div aria-hidden className="absolute -bottom-20 -left-10 size-56 rounded-full bg-[#6D5BFF]/50 blur-3xl" />
+      <div aria-hidden className="absolute -right-10 -top-16 size-48 rounded-full bg-[#2DD4BF]/30 blur-2xl" />
+      <div aria-hidden className="absolute -bottom-20 -left-10 size-56 rounded-full bg-[#0A3A63]/60 blur-3xl" />
       <div aria-hidden className="absolute inset-0 rounded-[inherit] border border-white/25 bg-white/[0.06] backdrop-blur-[2px]" />
 
       <div className="relative flex h-full flex-col justify-between">
@@ -41,11 +41,11 @@ export function VirtualCard({ card, revealed = false, className, compact }: { ca
 
         <div className="flex items-end justify-between gap-3 text-xs">
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-wider text-white/60">Card holder</p>
+            <p className="text-[10px] uppercase tracking-wider text-white/75">Card holder</p>
             <p className="truncate font-medium">{revealed || compact ? card.cardholderName : card.cardholderName.split(" ")[0] + " ••••"}</p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-wider text-white/60">Expires</p>
+            <p className="text-[10px] uppercase tracking-wider text-white/75">Expires</p>
             <p className="amount font-medium">{pending ? "--/--" : revealed ? `${String(card.expiryMonth).padStart(2, "0")}/${String(card.expiryYear).slice(-2)}` : "••/••"}</p>
           </div>
           <span className="font-display text-base font-bold italic tracking-tight">{card.network === "VISA" ? "VISA" : "MC"}</span>
@@ -53,8 +53,8 @@ export function VirtualCard({ card, revealed = false, className, compact }: { ca
       </div>
 
       {inactive && (
-        <div className="absolute inset-0 grid place-items-center rounded-[inherit] bg-[#0A0F1E]/55 backdrop-blur-[1px]">
-          <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[#0B1533]">
+        <div className="absolute inset-0 grid place-items-center rounded-[inherit] bg-[#0F172A]/60 backdrop-blur-[1px]">
+          <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[#0F172A]">
             {card.status === "FROZEN" ? "Frozen" : card.status === "BLOCKED" ? "Blocked" : card.status === "REJECTED" ? "Request declined" : "Awaiting approval"}
           </span>
         </div>

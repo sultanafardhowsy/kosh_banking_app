@@ -73,11 +73,11 @@ export default function LoanDetailPage({ params }: { params: Promise<{ id: strin
                   <div className="flex items-center gap-2 text-sm">
                     <CalendarClock className="size-4 text-kosh-accent-soft" />
                     <span>
-                      EMI #{next.installmentNo} {next.status === "OVERDUE" ? <span className="font-semibold text-[#FCA5A5]">overdue</span> : "due"} {formatDate(next.dueDate)} —{" "}
+                      EMI #{next.installmentNo} {next.status === "OVERDUE" ? <span className="font-semibold text-kosh-on-brand-negative">overdue</span> : "due"} {formatDate(next.dueDate)} —{" "}
                       <Money value={next.amountDue} className="font-semibold" />
                     </span>
                   </div>
-                  <Button className="bg-kosh-accent text-kosh-accent-fg" onPress={() => { setKey(newIdempotencyKey()); setPinError(null); setOpen(true); }}>
+                  <Button className="bg-kosh-brand-accent font-semibold text-kosh-brand-accent-fg" onPress={() => { setKey(newIdempotencyKey()); setPinError(null); setOpen(true); }}>
                     Pay EMI
                   </Button>
                 </div>

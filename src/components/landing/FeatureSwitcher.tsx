@@ -73,9 +73,9 @@ export function FeatureSwitcher() {
         aria-labelledby={`tab-${current.id}`}
         className="relative overflow-hidden rounded-[28px] bg-kosh-navy p-4 sm:p-8"
       >
-        <div aria-hidden className="absolute -right-24 -top-24 size-80 rounded-full bg-[#3557F5]/40 blur-3xl" />
-        <div aria-hidden className="absolute -bottom-28 -left-16 size-72 rounded-full bg-[#22B8C8]/25 blur-3xl" />
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0A0F1E] shadow-2xl">
+        <div aria-hidden className="absolute -right-24 -top-24 size-80 rounded-full bg-[#6BA6E0]/30 blur-3xl" />
+        <div aria-hidden className="absolute -bottom-28 -left-16 size-72 rounded-full bg-[#2DD4BF]/20 blur-3xl" />
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0F172A] shadow-2xl">
           <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5" aria-hidden>
             <span className="size-2.5 rounded-full bg-white/20" />
             <span className="size-2.5 rounded-full bg-white/20" />

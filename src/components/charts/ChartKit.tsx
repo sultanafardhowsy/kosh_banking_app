@@ -13,6 +13,8 @@ import { formatMoney, toBigInt } from "@/lib/money";
  * every chart has a table view (relief for the low-contrast aqua slot).
  */
 export const SERIES = ["var(--series-1)", "var(--series-2)", "var(--series-3)"] as const;
+/** Text colour that passes 4.5:1 on each series fill (white fails on teal/amber). */
+export const SERIES_FG = ["var(--series-1-fg)", "var(--series-2-fg)", "var(--series-3-fg)"] as const;
 
 export type TableSpec = { columns: string[]; rows: (string | number)[][] };
 
@@ -124,20 +126,19 @@ export function KoshTooltip({
   money?: boolean;
 }) {
   if (!active || !payload?.length) return null;
-  // A series can be drawn twice (a soft area fill under its line). Recharts still hands the
-  // hidden copy (tooltipType="none") to custom tooltips, so skip it and keep one row per series.
   const seen = new Set<string>();
   const rows = payload.filter((p) => {
+    if (p.type === "none") return false;
     const key = String(p.dataKey ?? p.name);
-    if (p.type === "none" || seen.has(key)) return false;
+    if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
   return (
     <div className="rounded-xl border border-kosh-border bg-kosh-surface px-3 py-2 text-xs shadow-lg">
       <p className="mb-1 font-medium text-kosh-text">{label}</p>
-      {rows.map((p) => (
-        <p key={String(p.dataKey ?? p.name)} className="flex items-center gap-2 text-kosh-muted">
+      {rows.map((p, index) => (
+        <p key={`${p.dataKey ?? p.name ?? "series"}-${index}`} className="flex items-center gap-2 text-kosh-muted">
           <span className="size-2 rounded-full" style={{ background: p.color }} aria-hidden />
           {p.name}
           <span className="amount ml-auto pl-3 font-medium text-kosh-text">
@@ -201,8 +202,8 @@ export function SegmentedBar({ parts, format }: { parts: { label: string; value:
             <div
               key={p.label}
               title={`${p.label}: ${format(p.value)} (${Math.round((p.value / total) * 100)}%)`}
-              className="flex items-center rounded-[4px] px-2 text-xs font-semibold text-white"
-              style={{ width: `${(p.value / total) * 100}%`, background: SERIES[i % SERIES.length] }}
+              className="flex items-center rounded-[4px] px-2 text-xs font-semibold"
+              style={{ width: `${(p.value / total) * 100}%`, background: SERIES[i % SERIES.length], color: SERIES_FG[i % SERIES_FG.length] }}
             >
               {p.value / total > 0.12 && `${Math.round((p.value / total) * 100)}%`}
             </div>

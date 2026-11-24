@@ -14,7 +14,7 @@ import { cn, formatAccountNumber, formatDate, titleCase } from "@/lib/format";
 const TYPE_STYLE = {
   SAVINGS: "bg-kosh-navy text-kosh-navy-fg",
   CURRENT: "bg-kosh-surface text-kosh-text border border-kosh-border",
-  BUSINESS: "bg-gradient-to-br from-[#1A2A5E] to-[#2F6BFF] text-white",
+  BUSINESS: "bg-gradient-to-br from-[#0B1220] to-[#0A3A63] text-white",
 } as const;
 
 export default function AccountsPage() {

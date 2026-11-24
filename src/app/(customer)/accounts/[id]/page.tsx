@@ -76,7 +76,7 @@ export default function AccountStatementPage({ params }: { params: Promise<{ id:
             <div className="flex gap-6 text-sm">
               <div>
                 <p className="text-white/60">Money in</p>
-                <Money value={data!.totals.credits} className="font-semibold text-[#6EE7B7]" />
+                <Money value={data!.totals.credits} className="font-semibold text-kosh-on-brand-positive" />
               </div>
               <div>
                 <p className="text-white/60">Money out</p>
