@@ -6,8 +6,8 @@ Kosh is a full-stack digital bank with three roles — **Customer, Staff, Admin*
 
 The priority is **correct, atomic, server-enforced banking logic**: every transfer locks both accounts, re-checks every rule on the server, and writes the debit and credit together or not at all. History is never edited; mistakes are corrected with compensating transactions.
 
-- **Live demo:** `https://<your-app>.vercel.app` *(add after deploying — see [Deployment](#deployment-vercel--neon))*
-- **Repository:** `https://github.com/<you>/kosh`
+- **Live demo:** [kosh-banking-app.vercel.app](https://kosh-banking-app.vercel.app)
+- **Repository:** [sultanafardhowsy/kosh_banking_app](https://github.com/sultanafardhowsy/kosh_banking_app)
 
 ---
 
@@ -22,7 +22,7 @@ The priority is **correct, atomic, server-enforced banking logic**: every transf
 | Staff 2 | `staff2@kosh.demo` | `Demo@1234` | |
 
 **Transaction PIN for every seeded account: `1234`.** The login page has one-click demo buttons.
-Sign-in is rate-limited to 3 attempts per 10 seconds per IP (Better Auth) — wait a moment if you switch roles very quickly.
+Sign-in requests are rate-limited by Better Auth (30 requests per 60 seconds).
 
 **Things to try:** send money as the customer (try a wrong PIN first) → sign in as staff and approve a pending deposit → as admin, review a flagged transaction and reverse it, approve the loan under review (watch the disbursement and EMI schedule appear), freeze an account, change the transfer fee and see it on the next transfer.
 
@@ -163,7 +163,7 @@ Extras: **optimistic** "mark notification read" (`updateQueryData` + undo on fai
 - `role`, `status`, `isVerified` are Better Auth `additionalFields` with `input: false` — **self sign-up can only ever create a CUSTOMER**; a request that sends `role: "ADMIN"` is ignored (covered by a test).
 - **Blocked/inactive users** can't create a session (`databaseHooks.session.create.before`), every API call re-checks status (`requireUser`), and blocking deletes existing sessions.
 - `middleware.ts` only redirects signed-out visitors (UX). **The security boundary is the route handlers** (`requireRole`, ownership checks returning 404) and each role layout's server-side role check.
-- Better Auth's built-in rate limit protects sign-in (3 attempts / 10 s per IP).
+- Better Auth's built-in rate limit is configured for 30 requests per 60 seconds.
 - **Google sign-in** (optional, `socialProviders.google`) shows only when `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set. A Google user is created like a self sign-up: **CUSTOMER, unverified, no accounts**. The blocked-user hook applies to Google sessions too. Better Auth only links a Google identity to an existing user whose email is already verified, so nobody can claim someone else's account by pre-registering their address.
 - **Customer KYC self-service:** a self-registered or Google customer fills in phone, NID, address and date of birth on *Profile* (18+ checked on the server). Staff get a queue alert and can then verify them. Once verified the details lock, and changes go through staff.
 
@@ -171,8 +171,8 @@ Extras: **optimistic** "mark notification read" (`updateQueryData` + undo on fai
 
 1. [Google Cloud Console](https://console.cloud.google.com/) → *APIs & Services* → *OAuth consent screen*: choose *External* and add your email as a test user.
 2. *Credentials* → *Create credentials* → *OAuth client ID* → *Web application*.
-3. *Authorised JavaScript origins*: `http://localhost:3000` and `https://your-app.vercel.app`.
-4. *Authorised redirect URIs*: `http://localhost:3000/api/auth/callback/google` and `https://your-app.vercel.app/api/auth/callback/google`.
+3. *Authorised JavaScript origins*: `http://localhost:3000` and `https://kosh-banking-app.vercel.app`.
+4. *Authorised redirect URIs*: `http://localhost:3000/api/auth/callback/google` and `https://kosh-banking-app.vercel.app/api/auth/callback/google`.
 5. Put the client ID and secret into `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (locally and in Vercel), and restart or redeploy.
 
 ---
@@ -362,7 +362,7 @@ Also: `deposit_withdrawal_requests`, `loan_installments`, `loan_notes`, `notific
 - Sessions in httpOnly cookies; blocked users lose all sessions; sign-in rate limiting.
 - **Two-factor** (emailed one-time code) for large transfers, PIN changes, reversals and settings changes. See *Two-factor for sensitive operations*.
 
-### Tests (`npm test`) — 102
+### Tests (`npm test`) — 103
 
 | Suite | What it proves |
 |---|---|
@@ -377,9 +377,9 @@ Also: `deposit_withdrawal_requests`, `loan_installments`, `loan_notes`, `notific
 | Variable | Purpose |
 |---|---|
 | `DATABASE_URL` | Neon **pooled** connection string (host contains `-pooler`) — used at runtime |
-| `DIRECT_URL` | Neon **direct** connection string (same host without `-pooler`) — used by migrations and the seed |
+| `DIRECT_URL` | Neon **direct** connection string (same host without `-pooler`) — used by Prisma migrations |
 | `BETTER_AUTH_SECRET` | 32+ character random string (`npx @better-auth/cli secret`) |
-| `BETTER_AUTH_URL` | App URL, e.g. `http://localhost:3000` or `https://your-app.vercel.app` |
+| `BETTER_AUTH_URL` | App URL, e.g. `http://localhost:3000` or `https://kosh-banking-app.vercel.app` |
 | `NEXT_PUBLIC_APP_URL` | Same as above (also used for links inside emails) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | *Optional.* Enables "Continue with Google" |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` | *Optional.* Send emails through SMTP with Nodemailer |
@@ -397,9 +397,10 @@ Requirements: **Node.js 20.9+** (22 LTS recommended) and a free [Neon](https://n
 
 ```bash
 npm install            # also runs prisma generate
-# create .env from .env.example and fill in the values
+# copy .env.example to .env and fill in the values
 npm run db:deploy      # create the tables (applies prisma/migrations)
-npm run db:seed        # load the demo data (resets everything; safe to re-run)
+# WARNING: db:seed truncates all existing data; use only with an empty/disposable database
+npm run db:seed        # load demo data (destructive full reset)
 npm run dev            # http://localhost:3000
 ```
 
@@ -418,7 +419,7 @@ npm run dev            # http://localhost:3000
 2. In Neon, create the project and copy the **pooled** and **direct** connection strings.
 3. In Vercel, **Import** the repo. Framework: Next.js. Add the five required environment variables, plus any optional Google/email ones (use the Vercel URL for `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL`).
 4. Deploy. Vercel runs `npm run vercel-build` → `prisma generate && prisma migrate deploy && next build`, so the tables are created automatically.
-5. Seed the production database once from your machine: point `.env` at the production `DATABASE_URL` / `DIRECT_URL` and run `npm run db:seed`.
+5. Only if the production database is a fresh, disposable demo database, seed it from your machine. `npm run db:seed` truncates all existing users and banking data before creating the demo dataset. Never run it against a database whose existing data must be retained.
 6. Open the live URL and sign in with each demo account to confirm.
 
 If you change the domain later, update `BETTER_AUTH_URL` and redeploy.
