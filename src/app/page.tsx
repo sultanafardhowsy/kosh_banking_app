@@ -3,6 +3,7 @@ import { BadgeCheck, CalendarClock, KeyRound, ScrollText, Snowflake, Gauge, Shie
 import { Logo } from "@/components/brand/Logo";
 import { NoticeBar } from "@/components/landing/NoticeBar";
 import { FeatureSwitcher } from "@/components/landing/FeatureSwitcher";
+import { MobileMenu } from "@/components/landing/MobileMenu";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { DEMO_PASSWORD, DEMO_USERS } from "@/lib/demo-accounts";
 import { LOAN_PRODUCTS } from "@/lib/loan-products";
@@ -55,7 +56,7 @@ export default async function HomePage() {
   ];
 
   return (
-    <div className="min-h-dvh bg-[#F3F7FC] dark:bg-kosh-bg">
+    <div className="min-h-dvh bg-kosh-bg">
       <NoticeBar />
 
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
@@ -68,8 +69,11 @@ export default async function HomePage() {
         </nav>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Link href="/login" className="rounded-full px-4 py-2 text-sm font-medium hover:bg-kosh-subtle">Log in</Link>
-          <Link href="/register" className="hidden rounded-full bg-kosh-navy px-4 py-2 text-sm font-medium text-kosh-navy-fg hover:opacity-90 sm:inline-flex">Open account</Link>
+          <MobileMenu />
+          <Link href="/faq" className="hidden rounded-full px-3 py-2 text-sm font-medium hover:bg-kosh-subtle md:inline-flex">FAQ</Link>
+          <Link href="/contact" className="hidden rounded-full px-3 py-2 text-sm font-medium hover:bg-kosh-subtle md:inline-flex">Contact</Link>
+          <Link href="/login" className="hidden rounded-full px-4 py-2 text-sm font-medium hover:bg-kosh-subtle md:inline-flex">Log in</Link>
+          <Link href="/register" className="hidden rounded-full bg-kosh-navy px-4 py-2 text-sm font-medium text-kosh-navy-fg hover:opacity-90 md:inline-flex">Open account</Link>
         </div>
       </header>
 
@@ -111,7 +115,7 @@ export default async function HomePage() {
         </section>
 
         {/* Demo logins — useful, not decorative */}
-        <section aria-labelledby="demo-heading" className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <section aria-labelledby="demo-heading" className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-24">
           <div className="flex flex-col gap-6 rounded-[24px] border border-kosh-border bg-kosh-surface p-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h2 id="demo-heading" className="text-xl font-semibold">Try it from three sides</h2>
@@ -121,9 +125,10 @@ export default async function HomePage() {
             </div>
             <ul className="grid gap-3 sm:grid-cols-3">
               {DEMO_USERS.map((u) => (
-                <li key={u.email} className="rounded-2xl bg-kosh-subtle px-4 py-3">
-                  <p className="text-sm font-semibold">{u.label}</p>
-                  <p className="text-xs text-kosh-muted">{u.email}</p>
+                <li key={u.email} className={`relative overflow-hidden rounded-2xl ${GRADIENT} px-4 py-3 text-white`}>
+                  <div aria-hidden className="absolute -right-6 -top-6 size-20 rounded-full bg-[#2DD4BF]/20 blur-xl" />
+                  <p className="relative text-sm font-semibold">{u.label}</p>
+                  <p className="relative text-xs text-white/70">{u.email}</p>
                 </li>
               ))}
             </ul>
@@ -133,17 +138,17 @@ export default async function HomePage() {
         {/* Features */}
         <section id="features" aria-labelledby="features-heading" className="mx-auto max-w-7xl scroll-mt-8 px-5 py-16 sm:px-8 lg:py-24">
           <h2 id="features-heading" className="max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl">Everything you do with money. All in one place.</h2>
-          <div className="mt-12">
+          <div className="mt-10">
             <FeatureSwitcher />
           </div>
         </section>
 
-        {/* Cards — dark section */}
-        <section id="cards" aria-labelledby="cards-heading" className="scroll-mt-8 bg-[#0F172A] px-5 py-20 text-white sm:px-8 lg:py-28">
+        {/* Cards — gradient in light mode, original near-black in dark mode */}
+        <section id="cards" aria-labelledby="cards-heading" className={`scroll-mt-8 px-5 py-16 text-white sm:px-8 lg:py-24 dark:bg-[#0F172A] ${GRADIENT}`}>
           <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2">
             <div className="relative mx-auto h-[320px] w-full max-w-[460px]">
-              <div className={`absolute left-6 top-0 aspect-[1.586] w-[300px] -rotate-[10deg] rounded-[22px] ${GRADIENT} opacity-70 sm:w-[340px]`} aria-hidden />
-              <div className="absolute left-14 top-10 aspect-[1.586] w-[300px] -rotate-[3deg] rounded-[22px] bg-[linear-gradient(135deg,#0A3A63,#0F4C81)] opacity-90 sm:w-[340px]" aria-hidden />
+              <div className="absolute left-6 top-0 aspect-[1.586] w-[300px] -rotate-[10deg] rounded-[22px] bg-white/10 border border-white/20 backdrop-blur-sm sm:w-[340px]" aria-hidden />
+              <div className="absolute left-14 top-10 aspect-[1.586] w-[300px] -rotate-[3deg] rounded-[22px] bg-white/15 border border-white/25 backdrop-blur-sm sm:w-[340px]" aria-hidden />
               <GlassCard number="4000 •••• •••• 4417" holder="AYESHA SIDDIQUA" expiry="03/29" className="left-20 top-20 rotate-[4deg]" />
             </div>
             <div className="max-w-lg">
@@ -170,18 +175,21 @@ export default async function HomePage() {
         </section>
 
         {/* Accounts + live limits */}
-        <section id="accounts" aria-labelledby="accounts-heading" className="mx-auto max-w-7xl scroll-mt-8 px-5 py-20 sm:px-8 lg:py-28">
+        <section id="accounts" aria-labelledby="accounts-heading" className="mx-auto max-w-7xl scroll-mt-8 px-5 py-16 sm:px-8 lg:py-24">
           <h2 id="accounts-heading" className="max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl">Pick the account that fits.</h2>
-          <div className="mt-12 grid gap-4 md:grid-cols-3">
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
             {plans.map((p) => (
-              <article key={p.name} className="flex flex-col rounded-[24px] border border-kosh-border bg-kosh-surface p-6">
-                <h3 className="text-2xl font-semibold">{p.name}</h3>
-                <p className="mt-2 text-sm text-kosh-muted">{p.who}</p>
-                <ul className="mt-6 space-y-2.5 text-sm">
-                  {p.points.map((pt) => (
-                    <li key={pt} className="flex gap-2.5"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-kosh-info" />{pt}</li>
-                  ))}
-                </ul>
+              <article key={p.name} className={`relative flex flex-col overflow-hidden rounded-[24px] ${GRADIENT} p-6 text-white`}>
+                <div aria-hidden className="absolute -right-8 -top-8 size-36 rounded-full bg-[#2DD4BF]/20 blur-2xl" />
+                <div className="relative">
+                  <h3 className="text-2xl font-semibold">{p.name}</h3>
+                  <p className="mt-2 text-sm text-white/70">{p.who}</p>
+                  <ul className="mt-6 space-y-2.5 text-sm">
+                    {p.points.map((pt) => (
+                      <li key={pt} className="flex gap-2.5"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-[#2DD4BF]" />{pt}</li>
+                    ))}
+                  </ul>
+                </div>
               </article>
             ))}
             <article className="flex flex-col rounded-[24px] bg-kosh-navy p-6 text-white md:col-span-3 lg:flex-row lg:items-center lg:gap-12">
@@ -208,9 +216,10 @@ export default async function HomePage() {
             <h3 className="text-lg font-semibold">Loans with fixed rates</h3>
             <ul className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-5">
               {Object.values(LOAN_PRODUCTS).map((l) => (
-                <li key={l.label} className="rounded-2xl bg-kosh-subtle px-4 py-3">
-                  <p className="font-semibold">{l.label}</p>
-                  <p className="text-kosh-muted">{formatBps(l.rateBps)} a year, up to {l.maxMonths} months</p>
+                <li key={l.label} className={`relative overflow-hidden rounded-2xl ${GRADIENT} px-4 py-3 text-white`}>
+                  <div aria-hidden className="absolute -right-6 -top-6 size-20 rounded-full bg-[#2DD4BF]/20 blur-xl" />
+                  <p className="relative font-semibold">{l.label}</p>
+                  <p className="relative mt-0.5 text-white/70">{formatBps(l.rateBps)} a year, up to {l.maxMonths} months</p>
                 </li>
               ))}
             </ul>
@@ -218,23 +227,27 @@ export default async function HomePage() {
         </section>
 
         {/* Security */}
-        <section id="security" aria-labelledby="security-heading" className="scroll-mt-8 bg-kosh-surface px-5 py-20 sm:px-8 lg:py-28">
+        <section id="security" aria-labelledby="security-heading" className="scroll-mt-8 bg-kosh-subtle px-5 py-16 sm:px-8 lg:py-24 dark:bg-kosh-surface">
           <div className="mx-auto max-w-7xl">
             <h2 id="security-heading" className="max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl">Your money&apos;s safe space.</h2>
             <p className="mt-4 max-w-xl text-lg text-kosh-muted">What happens behind the button, in plain words.</p>
-            <ul className="mt-12 grid gap-x-10 gap-y-10 md:grid-cols-2">
+            <ul className="mt-10 grid gap-4 sm:grid-cols-2">
               {[
                 { icon: ShieldCheck, t: "Both sides or neither", d: "A transfer locks both accounts, checks your balance, limits and PIN, then writes the debit and credit together. If anything fails, nothing moves." },
                 { icon: Users, t: "Two people for every approval", d: "Deposits, withdrawals and loans are approved by bank staff, never by the person who asked. Loans need a second, admin decision." },
                 { icon: CalendarClock, t: "Nothing is rewritten", d: "Mistakes are fixed with a new, opposite transaction. The original stays in your history, marked as reversed." },
                 { icon: ScrollText, t: "Every staff action is logged", d: "Freezing an account, approving a loan or changing a fee leaves an audit entry with who did it and why." },
               ].map(({ icon: Icon, t, d }) => (
-                <li key={t} className="flex gap-4">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-kosh-subtle"><Icon className="size-5 text-kosh-info" /></span>
-                  <span>
-                    <span className="block text-lg font-semibold">{t}</span>
-                    <span className="mt-1 block max-w-md leading-relaxed text-kosh-muted">{d}</span>
-                  </span>
+                <li key={t} className={`relative overflow-hidden rounded-[24px] ${GRADIENT} p-6 text-white`}>
+                  {/* subtle teal glow in the corner */}
+                  <div aria-hidden className="absolute -right-8 -top-8 size-32 rounded-full bg-[#2DD4BF]/20 blur-2xl" />
+                  <div className="relative">
+                    <span className="grid size-11 place-items-center rounded-2xl bg-white/10">
+                      <Icon className="size-5 text-[#2DD4BF]" />
+                    </span>
+                    <p className="mt-5 font-semibold leading-snug">{t}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-white/70">{d}</p>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -273,6 +286,8 @@ export default async function HomePage() {
             <Link href="/register" className="hover:text-white">Open account</Link>
             <a href="#features" className="hover:text-white">Features</a>
             <a href="#security" className="hover:text-white">Security</a>
+            <Link href="/faq" className="hover:text-white">FAQ</Link>
+            <Link href="/contact" className="hover:text-white">Contact</Link>
           </nav>
         </div>
       </footer>

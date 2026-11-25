@@ -1,0 +1,67 @@
+/* ==================================================================
+   Kosh — Light-mode colour tokens (v1)
+   60% canvas neutrals · 30% surfaces · 10% brand / interactive
+   Contrast ratios are WCAG 2.x, measured against #FFFFFF unless noted.
+   Tiers:  AA text ≥ 4.5:1 · Amount/balance text ≥ 7:1 · UI/borders ≥ 3:1
+=================================================================== */
+:root {
+  /* ---------- 60% · Canvas neutrals ---------- */
+  --color-bg-canvas: #F5F7FA;        /* app background */
+  --color-bg-sunken: #EDF0F5;        /* table headers, inset wells, skeletons */
+
+  /* ---------- 30% · Surfaces ---------- */
+  --color-surface: #FFFFFF;          /* cards, sheets, list containers */
+  --color-surface-hover: #F8F9FC;    /* row hover / pressed list item */
+  --color-surface-selected: #EAF0FF; /* selected row, active filter chip */
+  --color-border-subtle: #E2E6EE;    /* card outlines, dividers (decorative) */
+  --color-border-input: #8790A3;     /* 3.21:1 — input & checkbox outlines */
+
+  /* ---------- Text ---------- */
+  --color-text-primary: #0B1533;     /* 17.96:1 · balances, amounts, headings */
+  --color-text-secondary: #424C61;   /*  8.61:1 · body copy, pending amounts */
+  --color-text-tertiary: #5A6477;    /*  5.96:1 · timestamps, captions, labels */
+  --color-text-disabled: #9AA2B2;    /* exempt (WCAG 1.4.3) — never for info */
+  --color-text-link: #1F56D8;        /*  6.21:1 */
+
+  /* ---------- 10% · Brand & interactive ---------- */
+  --color-brand-ink: #0B1533;        /* header, hero balance card */
+  --color-on-brand-ink: #FFFFFF;     /* 17.96:1 on brand-ink */
+  --color-on-brand-ink-muted: #AFC3FF; /* 10.32:1 on brand-ink */
+  --color-brand: #1F56D8;            /* primary buttons, active tab */
+  --color-brand-hover: #1A47B8;      /* white text 7.96:1 */
+  --color-brand-pressed: #163C9C;    /* white text 9.72:1 */
+  --color-on-brand: #FFFFFF;         /* 6.21:1 on brand */
+  --color-brand-soft: #EAF0FF;       /* quick-action tiles, secondary buttons */
+  --color-on-brand-soft: #1A47B8;    /* 6.98:1 on brand-soft */
+  --color-focus-ring: #1F56D8;       /* 2px ring + 2px white offset */
+
+  /* ---------- Semantic · Success (incoming funds, positive yield) ---------- */
+  --color-success-bg: #E6F5EE;
+  --color-success-fg: #0B6B48;       /* 6.54:1 white · 5.81:1 on success-bg */
+  --color-success-solid: #0B7A52;    /* white text 5.36:1 */
+  --color-amount-credit: #075C3D;    /* 8.05:1 white · 7.50:1 canvas */
+
+  /* ---------- Semantic · Warning (pending, low balance) ---------- */
+  --color-warning-bg: #FEF4D6;
+  --color-warning-fg: #8A3B0A;       /* 7.75:1 white · 7.06:1 on warning-bg */
+  --color-warning-solid: #B45309;    /* icons/borders 5.02:1 */
+
+  /* ---------- Semantic · Error (failed, overdraft, destructive) ---------- */
+  --color-error-bg: #FDEDED;
+  --color-error-fg: #A3161D;         /* 7.81:1 white · 6.88:1 on error-bg */
+  --color-error-solid: #C4262E;      /* destructive button, white text 5.73:1 */
+  --color-error-solid-hover: #A3161D;/* white text 7.81:1 */
+  --color-amount-overdraft: #8C1218; /* 9.48:1 white · 8.83:1 canvas */
+
+  /* ---------- Semantic · Info (banners, tips) ---------- */
+  --color-info-bg: #EAF1FE;
+  --color-info-fg: #1E40AF;          /* 8.72:1 white · 7.69:1 on info-bg */
+
+  /* ---------- Neutral status (draft, closed, on hold) ---------- */
+  --color-neutral-bg: #E9EDF5;
+  --color-neutral-fg: #33406A;       /* 8.60:1 on neutral-bg */
+
+  /* ---------- Elevation (light mode uses shadow, not colour) ---------- */
+  --shadow-card: 0 1px 2px rgb(11 21 51 / 0.04), 0 1px 3px rgb(11 21 51 / 0.06);
+  --shadow-raised: 0 4px 12px rgb(11 21 51 / 0.08);
+}

@@ -35,6 +35,8 @@ const FEATURES = [
   },
 ] as const;
 
+const GRADIENT = "bg-[linear-gradient(135deg,#0A3A63_0%,#0F4C81_50%,#007A78_100%)]";
+
 /** Clickable list on the left; the navy panel on the right swaps to that part of the real app. */
 export function FeatureSwitcher() {
   const [active, setActive] = useState<(typeof FEATURES)[number]["id"]>("transfer");
@@ -54,12 +56,13 @@ export function FeatureSwitcher() {
               aria-controls="feature-panel"
               onClick={() => setActive(f.id)}
               className={cn(
-                "rounded-2xl px-5 py-4 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-kosh-info",
-                on ? "bg-kosh-surface shadow-[0_1px_0_var(--kosh-border),0_12px_30px_-18px_rgba(11,21,51,0.35)]" : "hover:bg-kosh-surface/60",
+                "relative overflow-hidden rounded-2xl px-5 py-4 text-left outline-none transition-all focus-visible:ring-2 focus-visible:ring-kosh-info",
+                on ? GRADIENT : "hover:bg-kosh-surface/60",
               )}
             >
-              <span className={cn("font-display text-xl font-semibold sm:text-2xl", on ? "text-kosh-text" : "text-kosh-muted")}>{f.title}</span>
-              <span className={cn("mt-1.5 block max-w-md text-[15px] leading-relaxed text-kosh-muted", !on && "hidden lg:block lg:opacity-0 lg:h-0 lg:mt-0 lg:overflow-hidden")}>
+              {on && <div aria-hidden className="absolute -right-6 -top-6 size-24 rounded-full bg-[#2DD4BF]/20 blur-xl" />}
+              <span className={cn("relative font-display text-xl font-semibold sm:text-2xl", on ? "text-white" : "text-kosh-muted")}>{f.title}</span>
+              <span className={cn("relative mt-1.5 block max-w-md text-[15px] leading-relaxed", on ? "text-white/70" : "text-kosh-muted", !on && "hidden lg:block lg:opacity-0 lg:h-0 lg:mt-0 lg:overflow-hidden")}>
                 {f.body}
               </span>
             </button>
