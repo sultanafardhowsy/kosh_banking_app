@@ -6,11 +6,11 @@ import { DEFAULT_SETTINGS } from "@/lib/constants";
 export async function getSettings(client: Tx | typeof db = db) {
   const row = await client.bankSettings.findUnique({ where: { id: 1 } });
   if (row) return row;
-  return client.bankSettings.upsert({
-    where: { id: 1 },
-    update: {},
-    create: { id: 1, ...DEFAULT_SETTINGS },
+  await client.bankSettings.createMany({
+    data: [{ id: 1, ...DEFAULT_SETTINGS }],
+    skipDuplicates: true,
   });
+  return client.bankSettings.findUniqueOrThrow({ where: { id: 1 } });
 }
 
 export type BankSettingsRow = Awaited<ReturnType<typeof getSettings>>;
