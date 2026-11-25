@@ -16,7 +16,7 @@ export function CustomerCharts({ accountId }: { accountId?: string }) {
   const loading = isLoading || !accountId;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <ChartCard
         title="Monthly spending"
         subtitle="Money out of this account, incl. fees"

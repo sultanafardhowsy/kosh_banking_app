@@ -31,7 +31,7 @@ function CardWidget() {
   const { data, isLoading } = useGetMyCardsQuery();
   const card = data?.cards.find((c) => c.status === "ACTIVE") ?? data?.cards.find((c) => c.status === "FROZEN") ?? data?.cards[0];
   return (
-    <Panel className="h-fit p-5">
+    <Panel className="h-fit min-w-0 p-5">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-base font-semibold">Your card</h2>
         <Link href="/cards" className="text-sm font-medium text-kosh-info hover:underline">Manage</Link>
@@ -50,7 +50,7 @@ function CardWidget() {
 function RecentActivity({ accountId }: { accountId?: string }) {
   const { data, isLoading } = useGetTransactionsQuery({ accountId, page: 1, pageSize: 6 }, { skip: !accountId });
   return (
-    <Panel>
+    <Panel className="min-w-0">
       <PanelHeader
         title="Recent activity"
         description="Latest transactions on this account."
@@ -84,15 +84,15 @@ export function DashboardView() {
   const firstName = user?.name.split(" ")[0] ?? "there";
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-5 sm:space-y-6">
       <div>
         <p className="text-sm text-kosh-muted">Good to see you,</p>
         <h1 className="text-2xl font-semibold sm:text-[28px]">{firstName}</h1>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         {/* Balance card */}
-        <section className="relative overflow-hidden rounded-[22px] bg-kosh-navy p-6 text-kosh-navy-fg sm:p-7">
+        <section className="relative min-w-0 overflow-hidden rounded-[22px] bg-kosh-navy p-5 text-kosh-navy-fg sm:p-7">
           <div
             aria-hidden
             className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-kosh-brand-accent/20 blur-3xl"
@@ -105,24 +105,24 @@ export function DashboardView() {
             </div>
           ) : account ? (
             <>
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-white/70">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="min-w-0 text-sm text-white/70">
                   {account.nickname ?? `${titleCase(account.type)} account`}
                 </p>
                 <StatusBadge status={account.status} />
               </div>
-              <Money value={account.balance} className="mt-3 block text-4xl font-semibold sm:text-5xl" />
+              <Money value={account.balance} className="mt-3 block max-w-full truncate text-2xl font-semibold sm:text-5xl" />
               <p className="amount mt-2 text-sm text-white/60">{formatAccountNumber(account.accountNumber)}</p>
-              <div className="mt-6 flex flex-wrap gap-2">
+              <div className="mt-6 grid grid-cols-2 gap-2 sm:flex">
                 <Link
                   href="/transfer"
-                  className="inline-flex h-10 items-center gap-2 rounded-xl bg-kosh-brand-accent px-4 text-sm font-semibold text-kosh-brand-accent-fg hover:brightness-110"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-kosh-brand-accent px-3 text-sm font-semibold text-kosh-brand-accent-fg hover:brightness-110 sm:px-4"
                 >
                   <ArrowLeftRight className="size-4" /> Send money
                 </Link>
                 <Link
                   href="/requests"
-                  className="inline-flex h-10 items-center gap-2 rounded-xl bg-white/10 px-4 text-sm font-medium hover:bg-white/15"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white/10 px-3 text-sm font-medium hover:bg-white/15 sm:px-4"
                 >
                   <Plus className="size-4" /> Add money
                 </Link>
@@ -134,14 +134,14 @@ export function DashboardView() {
         </section>
 
         {/* Totals + quick actions */}
-        <Panel className="flex flex-col p-6">
+        <Panel className="flex min-w-0 flex-col p-5 sm:p-6">
           <p className="text-sm text-kosh-muted">Total across {accounts.length} account(s)</p>
           {isLoading ? (
             <SkeletonBlock className="mt-3 h-8 w-40" />
           ) : (
             <Money value={total} className="mt-2 text-3xl font-semibold" />
           )}
-          <div className="mt-auto grid grid-cols-4 gap-2 pt-6">
+          <div className="mt-auto grid grid-cols-2 gap-2 pt-6 sm:grid-cols-4">
             {QUICK_ACTIONS.map(({ label, href, icon: Icon }) => (
               <Link
                 key={label}
@@ -175,12 +175,12 @@ export function DashboardView() {
             </li>
           )}
           {accounts.map((a) => (
-            <li key={a.id} className="flex items-center justify-between gap-4 px-6 py-4">
+            <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{a.nickname ?? `${titleCase(a.type)} account`}</p>
                 <p className="amount text-xs text-kosh-muted">{formatAccountNumber(a.accountNumber)}</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="ml-auto flex items-center gap-2 sm:gap-3">
                 <StatusBadge status={a.status} className="hidden sm:inline-flex" />
                 <Money value={a.balance} className="text-sm font-semibold" />
               </div>
@@ -191,7 +191,7 @@ export function DashboardView() {
 
       <CustomerCharts accountId={account?.id} />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <RecentActivity accountId={account?.id} />
         <CardWidget />
       </div>

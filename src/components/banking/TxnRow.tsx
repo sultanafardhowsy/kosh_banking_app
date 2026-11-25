@@ -40,7 +40,7 @@ export function TxnIcon({ type, direction }: { type: TransactionType; direction:
 /** One transaction line, used on the dashboard and in history lists. */
 export function TxnRow({ t, href = true }: { t: CustomerTxn; href?: boolean }) {
   const body = (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 sm:gap-3">
       <TxnIcon type={t.type} direction={t.direction} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{t.counterparty}</p>
@@ -49,7 +49,7 @@ export function TxnRow({ t, href = true }: { t: CustomerTxn; href?: boolean }) {
           {formatDateTime(t.createdAt)}
         </p>
       </div>
-      <div className="text-right">
+      <div className="max-w-[112px] shrink-0 text-right sm:max-w-none">
         <Money
           value={t.net}
           direction={t.direction === "internal" ? undefined : t.direction}

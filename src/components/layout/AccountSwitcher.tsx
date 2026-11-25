@@ -30,7 +30,7 @@ export function AccountSwitcher() {
     <Dropdown>
       <Dropdown.Trigger
         aria-label="Switch account"
-        className="flex h-9 items-center gap-2 rounded-xl border border-kosh-border bg-kosh-surface px-3 text-sm outline-none hover:bg-kosh-subtle focus-visible:ring-2 focus-visible:ring-kosh-info"
+        className="flex h-9 w-full items-center justify-between gap-2 rounded-xl border border-kosh-border bg-kosh-surface px-3 text-sm outline-none hover:bg-kosh-subtle focus-visible:ring-2 focus-visible:ring-kosh-info md:w-auto md:justify-start"
       >
         <span className="font-medium">{current.nickname ?? titleCase(current.type)}</span>
         <span className="amount text-kosh-muted">{maskAccountNumber(current.accountNumber)}</span>

@@ -22,7 +22,7 @@ export function VirtualCard({ card, revealed = false, className, compact }: { ca
       <div aria-hidden className="absolute -bottom-20 -left-10 size-56 rounded-full bg-[#0A3A63]/60 blur-3xl" />
       <div aria-hidden className="absolute inset-0 rounded-[inherit] border border-white/25 bg-white/[0.06] backdrop-blur-[2px]" />
 
-      <div className="relative flex h-full flex-col justify-between">
+      <div className="relative grid h-full grid-rows-[auto_1fr_auto]">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
             <span className="font-display text-lg font-semibold tracking-tight">Kosh</span>
@@ -35,11 +35,13 @@ export function VirtualCard({ card, revealed = false, className, compact }: { ca
           </svg>
         </div>
 
-        <p className={cn("amount tracking-[0.14em]", compact ? "text-base" : "text-xl sm:text-2xl")}>
-          {pending ? "•••• •••• •••• ••••" : card.cardNumberMasked}
-        </p>
+        <div className="flex items-center">
+          <p className={cn("amount tracking-[0.14em]", compact ? "text-base" : "text-xl sm:text-2xl")}>
+            {pending ? "•••• •••• •••• ••••" : card.cardNumberMasked}
+          </p>
+        </div>
 
-        <div className="flex items-end justify-between gap-3 text-xs">
+        <div className="flex items-end justify-between gap-2 text-xs sm:gap-3">
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-wider text-white/75">Card holder</p>
             <p className="truncate font-medium">{revealed || compact ? card.cardholderName : card.cardholderName.split(" ")[0] + " ••••"}</p>
