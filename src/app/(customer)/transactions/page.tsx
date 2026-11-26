@@ -16,6 +16,7 @@ import { Money } from "@/components/ui/Money";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { TxnIcon, TxnRow, TXN_TYPE_LABEL } from "@/components/banking/TxnRow";
 import { formatDateTime, maskAccountNumber, titleCase } from "@/lib/format";
+import { DateRangeField } from "@/components/ui/DateRangeField";
 import type { CustomerTxn } from "@/types/api";
 
 const columns: Column<CustomerTxn>[] = [
@@ -76,8 +77,7 @@ export default function TransactionsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const mobileHide = showFilters ? "" : "max-md:hidden";
   const activeCount = [filters.q, filters.accountId, filters.type !== "ALL", filters.status !== "ALL", filters.from, filters.to].filter(Boolean).length;
-  const dateClass =
-    "h-10 w-full rounded-[var(--field-radius,12px)] border border-kosh-border bg-[var(--field-background)] px-3 text-sm text-kosh-text outline-none focus-visible:ring-2 focus-visible:ring-kosh-info";
+  const todayIso = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dhaka" }).format(new Date());
 
   return (
     <>
@@ -119,14 +119,13 @@ export default function TransactionsPage() {
           <Button variant="outline" className={mobileHide} onPress={() => { setQ(""); dispatch(resetFilters()); }}>
             <RotateCcw className="size-4" /> Reset
           </Button>
-          <label className={`flex flex-col gap-1 text-xs text-kosh-muted ${mobileHide}`}>
-            From
-            <input type="date" className={dateClass} value={filters.from ?? ""} max={filters.to ?? undefined} onChange={(e) => set({ from: e.target.value || null })} />
-          </label>
-          <label className={`flex flex-col gap-1 text-xs text-kosh-muted ${mobileHide}`}>
-            To
-            <input type="date" className={dateClass} value={filters.to ?? ""} min={filters.from ?? undefined} onChange={(e) => set({ to: e.target.value || null })} />
-          </label>
+          <DateRangeField
+            className={`sm:col-span-2 ${mobileHide}`}
+            label="Date range"
+            value={{ from: filters.from ?? null, to: filters.to ?? null }}
+            max={todayIso}
+            onChange={(r) => set({ from: r.from, to: r.to })}
+          />
         </div>
       </Panel>
 

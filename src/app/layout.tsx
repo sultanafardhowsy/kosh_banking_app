@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/space-grotesk";
+// Fallback for the taka sign (৳), which Inter and Space Grotesk don't include. Listed after
+// them in the font stacks, so the browser only downloads its Bengali subset when ৳ appears.
+import "@fontsource-variable/noto-sans-bengali";
 import "./globals.css";
 import Providers from "@/components/providers/Providers";
 

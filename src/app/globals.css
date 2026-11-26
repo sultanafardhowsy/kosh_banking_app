@@ -221,8 +221,8 @@
   --color-kosh-danger-bg: var(--kosh-danger-bg);
   --color-kosh-danger-fg: var(--kosh-danger-fg);
 
-  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk Variable", "Inter Variable", ui-sans-serif, sans-serif;
+  --font-sans: "Inter Variable", "Noto Sans Bengali Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk Variable", "Inter Variable", "Noto Sans Bengali Variable", ui-sans-serif, sans-serif;
 
   --radius-card: 20px;
   --radius-btn: 12px;
@@ -256,6 +256,39 @@ h3,
 /* App buttons: 12px radius (landing page uses full pills) */
 .button {
   border-radius: var(--radius-btn);
+}
+
+/* Alerts: HeroUI only tints the icon + title, so a description-only alert looked like a
+   plain grey field. Give each status a tinted surface, border and readable text. */
+.alert--danger,
+.alert--warning,
+.alert--success {
+  background: var(--alert-bg);
+  border: 1px solid color-mix(in srgb, var(--alert-fg) 28%, transparent);
+  box-shadow: none;
+}
+.alert--danger {
+  --alert-bg: var(--kosh-danger-bg);
+  --alert-fg: var(--kosh-danger-fg);
+}
+.alert--warning {
+  --alert-bg: var(--kosh-pending-bg);
+  --alert-fg: var(--kosh-pending-fg);
+}
+.alert--success {
+  --alert-bg: var(--kosh-success-bg);
+  --alert-fg: var(--kosh-success-fg);
+}
+.alert--danger .alert__indicator,
+.alert--danger .alert__title,
+.alert--danger .alert__description,
+.alert--warning .alert__indicator,
+.alert--warning .alert__title,
+.alert--warning .alert__description,
+.alert--success .alert__indicator,
+.alert--success .alert__title,
+.alert--success .alert__description {
+  color: var(--alert-fg);
 }
 
 /* Masked PIN: hide digits, show a dot on filled slots */

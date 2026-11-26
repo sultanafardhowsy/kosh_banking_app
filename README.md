@@ -208,7 +208,7 @@ A 6-digit code is emailed to the user before these go through:
 - **Bound to one operation:** the code is tied to a fingerprint of the exact request. A code for "৳30,000 to •••• 3093" can't approve "৳90,000 to someone else", and a code for one reversal can't reverse another transaction.
 - **Single use, 5 minutes, 5 wrong tries**, 30 s between codes and at most 5 per 15 minutes. Only an HMAC of the code is stored, and the copy in the Email log has the code blanked out.
 - **Money safety:** a large transfer checks the code before the database transaction and uses it up *inside* it. A wrong PIN or a failed transfer leaves the code usable, while wrong codes are still counted.
-- **Demo mode:** when no email provider is configured, nothing can reach an inbox, so the dialog shows the code ("Demo mode: … here is your code"). Once SMTP or Resend is set up, the code only arrives by email.
+- **Demo mode:** when no email provider is configured, nothing can reach an inbox, so the dialog shows the code ("Demo mode: … here is your code"). In production (`NODE_ENV=production`) this needs `OTP_DEMO_CODES="true"`; without it and without email, the server refuses to issue codes, so 2FA-protected operations fail instead of silently showing the code. Once SMTP or Resend is set up, the code only arrives by email.
 
 ---
 

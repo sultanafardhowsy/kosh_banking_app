@@ -17,6 +17,7 @@ import { formatMoney } from "@/lib/money";
 import { formatDateTime, maskAccountNumber, titleCase } from "@/lib/format";
 import type { BankTxn, BankTxnQuery, TransactionStatus, TransactionType } from "@/types/api";
 import { ReasonDialog } from "./ReasonDialog";
+import { DateRangeField } from "@/components/ui/DateRangeField";
 
 const REVERSIBLE = new Set<TransactionType>(["TRANSFER", "DEPOSIT", "WITHDRAWAL"]);
 
@@ -114,8 +115,11 @@ export function BankTransactions({ scope }: { scope: "staff" | "admin" }) {
         <NativeSelect aria-label="Type" value={f.type ?? ""} onChange={(e) => set({ type: (e.target.value || undefined) as TransactionType | undefined })} options={[{ value: "", label: "All types" }, ...Object.entries(TXN_TYPE_LABEL).map(([value, label]) => ({ value, label }))]} />
         <NativeSelect aria-label="Status" value={f.status ?? ""} onChange={(e) => set({ status: (e.target.value || undefined) as TransactionStatus | undefined })} options={[{ value: "", label: "Any status" }, ...["COMPLETED", "REVERSED", "PENDING", "FAILED"].map((s) => ({ value: s, label: titleCase(s) }))]} />
         <NativeSelect aria-label="Flags" value={f.flagged ?? ""} onChange={(e) => set({ flagged: (e.target.value || undefined) as BankTxnQuery["flagged"] })} options={[{ value: "", label: "Flagged or not" }, { value: "open", label: "Open flags" }, { value: "resolved", label: "Resolved flags" }]} />
-        <input type="date" aria-label="From" value={f.from ?? ""} onChange={(e) => set({ from: e.target.value || undefined })} className="h-10 rounded-[var(--field-radius,12px)] border border-kosh-border bg-[var(--field-background)] px-3 text-sm outline-none" />
-        <input type="date" aria-label="To" value={f.to ?? ""} onChange={(e) => set({ to: e.target.value || undefined })} className="h-10 rounded-[var(--field-radius,12px)] border border-kosh-border bg-[var(--field-background)] px-3 text-sm outline-none" />
+        <DateRangeField
+          className="sm:col-span-2"
+          value={{ from: f.from ?? null, to: f.to ?? null }}
+          onChange={(r) => set({ from: r.from ?? undefined, to: r.to ?? undefined })}
+        />
       </Panel>
       <Panel className={isFetching && !isLoading ? "opacity-70" : undefined}>
         <DataTable

@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, Button } from "@heroui/react";
+import { Button } from "@heroui/react";
+import { FormError, authErrorMessage } from "@/components/ui/FormError";
 import { signUp } from "@/lib/auth-client";
 import { registerSchema, type RegisterInput } from "@/lib/validators/auth";
 import { FormTextField } from "@/components/ui/FormTextField";
@@ -30,7 +31,10 @@ export function RegisterForm({ google = false }: { google?: boolean }) {
       setError(
         error.code === "USER_ALREADY_EXISTS" || error.status === 422
           ? "An account with this email already exists."
-          : (error.message ?? "Couldn't create your account."),
+          : authErrorMessage(error, "Couldn't create your account. Please try again.", {
+              PASSWORD_TOO_SHORT: "Use a password of at least 8 characters.",
+              INVALID_EMAIL: "Enter a valid email address.",
+            }),
       );
       return;
     }
@@ -46,11 +50,7 @@ export function RegisterForm({ google = false }: { google?: boolean }) {
       </p>
 
       {error && (
-        <Alert status="danger" className="mt-6">
-          <Alert.Content>
-            <Alert.Description>{error}</Alert.Description>
-          </Alert.Content>
-        </Alert>
+        <FormError className="mt-6" title="Couldn't create your account" message={error} />
       )}
 
       {google && (

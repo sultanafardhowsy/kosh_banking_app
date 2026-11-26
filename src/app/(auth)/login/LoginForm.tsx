@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, Button } from "@heroui/react";
+import { Button } from "@heroui/react";
+import { FormError, authErrorMessage } from "@/components/ui/FormError";
 import { Eye, EyeOff } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
 import { loginSchema, type LoginInput } from "@/lib/validators/auth";
@@ -44,9 +45,11 @@ export function LoginForm({ google = false }: { google?: boolean }) {
     const { data, error } = await signIn.email({ email: values.email, password: values.password });
     if (error) {
       setError(
-        error.status === 401 || error.code === "INVALID_EMAIL_OR_PASSWORD"
+        error.status === 401
           ? "Incorrect email or password."
-          : (error.message ?? "Couldn't sign you in."),
+          : authErrorMessage(error, "Couldn't sign you in. Please try again.", {
+              INVALID_EMAIL_OR_PASSWORD: "Incorrect email or password.",
+            }),
       );
       return;
     }
@@ -69,11 +72,7 @@ export function LoginForm({ google = false }: { google?: boolean }) {
       <p className="mt-2 text-sm text-kosh-muted">Sign in to your Kosh account.</p>
 
       {error && (
-        <Alert status="danger" className="mt-6">
-          <Alert.Content>
-            <Alert.Description>{error}</Alert.Description>
-          </Alert.Content>
-        </Alert>
+        <FormError className="mt-6" title="Couldn't sign in" message={error} />
       )}
 
       {google && (

@@ -9,7 +9,7 @@ import { writeAudit } from "@/server/audit";
 import { generateAccountNumber } from "@/lib/reference";
 import { formatMoney } from "@/lib/money";
 import { maskAccountNumber, titleCase } from "@/lib/format";
-import { isUniqueViolation } from "./locks";
+import { isUniqueViolation, lockAccounts, MONEY_TX_OPTIONS } from "./locks";
 import { getSettings } from "./settings.service";
 import { notifyRoles, notify } from "./notification.service";
 
@@ -282,15 +282,20 @@ export async function updateAccountAsAdmin(
   }
 
   const next: AccountStatus = input.action === "freeze" ? "FROZEN" : input.action === "unfreeze" ? "ACTIVE" : "CLOSED";
-  if (account.status === "CLOSED") throw new AppError("INVALID_STATE", "Closed accounts can't be changed");
-  if (account.status === next) throw new AppError("INVALID_STATE", `Account is already ${next.toLowerCase()}`);
-  if (input.action === "close" && account.balance !== BigInt(0)) throw new AppError("INVALID_STATE", "Only an account with a zero balance can be closed");
 
+  // Lock the row and re-check inside the transaction: a transfer or deposit landing
+  // between the check and the update could otherwise close an account that holds money.
   const updated = await db.$transaction(async (tx) => {
+    await lockAccounts(tx, [accountId]);
+    const current = await tx.account.findUniqueOrThrow({ where: { id: accountId } });
+    if (current.status === "CLOSED") throw new AppError("INVALID_STATE", "Closed accounts can't be changed");
+    if (current.status === next) throw new AppError("INVALID_STATE", `Account is already ${next.toLowerCase()}`);
+    if (input.action === "close" && current.balance !== BigInt(0)) throw new AppError("INVALID_STATE", "Only an account with a zero balance can be closed");
+
     const a = await tx.account.update({ where: { id: accountId }, data: { status: next } });
     await writeAudit({ actorId: admin.id, action: `ACCOUNT_${next === "ACTIVE" ? "UNFROZEN" : next}`, entity: "Account", entityId: accountId, metadata: { reason: input.reason } }, tx);
     return a;
-  });
+  }, MONEY_TX_OPTIONS);
   await notify([
     {
       userId: account.userId,

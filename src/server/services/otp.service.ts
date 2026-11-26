@@ -51,15 +51,32 @@ export function maskEmail(email: string) {
 }
 
 /**
- * Emails a fresh code. In log-only mode (no SMTP/Resend configured) nothing can reach an
- * inbox, so the code is returned as `demoCode` for the UI to show — documented in the README.
+ * Log-only mode (no SMTP/Resend) can't reach an inbox, so the code may be handed back as
+ * `demoCode` for the UI to show. That makes the "second factor" visible to whoever holds the
+ * session, so in production it needs an explicit opt-in (OTP_DEMO_CODES="true") — e.g. a
+ * public demo with fake @kosh.demo users. Otherwise production refuses to issue codes it
+ * can't deliver.
  */
+export function demoCodesAllowed() {
+  return (
+    emailConfig().provider === "log" &&
+    (process.env.NODE_ENV !== "production" || process.env.OTP_DEMO_CODES === "true")
+  );
+}
+
+/** Emails a fresh code (or returns it as `demoCode`, see `demoCodesAllowed`). */
 export async function requestOtp(
   user: SessionUser,
   purpose: OtpPurpose,
   payload: string,
   summary: string,
 ) {
+  if (emailConfig().provider === "log" && !demoCodesAllowed())
+    throw new AppError(
+      "INTERNAL_ERROR",
+      "Security codes can't be sent because email isn't set up. Contact the bank.",
+    );
+
   const now = Date.now();
   const recent = await db.otpChallenge.findMany({
     where: {
@@ -126,7 +143,7 @@ export async function requestOtp(
     challengeId: challenge.id,
     expiresAt,
     sentTo: maskEmail(emailConfig().redirectTo ?? user.email),
-    demoCode: emailConfig().provider === "log" ? code : undefined,
+    demoCode: demoCodesAllowed() ? code : undefined,
   };
 }
 
@@ -173,12 +190,23 @@ export async function verifyOtp(
       "This code has expired. Ask for a new one.",
     );
 
+  // Reserve an attempt BEFORE comparing, with a conditional update, so parallel
+  // guesses can't all slip past the limit check above. A correct code gives it back.
+  const reserved = await db.otpChallenge.updateMany({
+    where: { id: c.id, attempts: { lt: OTP_MAX_ATTEMPTS } },
+    data: { attempts: { increment: 1 } },
+  });
+  if (reserved.count !== 1)
+    throw new AppError(
+      "OTP_LOCKED",
+      "Too many wrong codes. Ask for a new one.",
+    );
+
   const expected = Buffer.from(c.codeHash, "hex");
   const given = Buffer.from(hashCode(c.id, proof.code.trim()), "hex");
   if (expected.length !== given.length || !timingSafeEqual(expected, given)) {
-    const { attempts } = await db.otpChallenge.update({
+    const { attempts } = await db.otpChallenge.findUniqueOrThrow({
       where: { id: c.id },
-      data: { attempts: { increment: 1 } },
       select: { attempts: true },
     });
     const left = OTP_MAX_ATTEMPTS - attempts;
@@ -193,6 +221,10 @@ export async function verifyOtp(
       { attemptsLeft: left },
     );
   }
+  await db.otpChallenge.update({
+    where: { id: c.id },
+    data: { attempts: { decrement: 1 } },
+  });
   return c.id;
 }
 

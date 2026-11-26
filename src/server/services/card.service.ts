@@ -50,6 +50,24 @@ const publicCard = {
   account: { select: { accountNumber: true, type: true, nickname: true, status: true } },
 } satisfies Prisma.CardSelect;
 
+/**
+ * Compare-and-set on the card's status: the write only happens if the card is still
+ * in one of `from`. Without it, two concurrent changes (an admin block and a customer
+ * unfreeze, or two staff approvals) could each pass their read-time check and the later
+ * write would win — e.g. a BLOCKED card turned back to ACTIVE.
+ */
+async function transitionCard(
+  client: Prisma.TransactionClient | typeof db,
+  cardId: string,
+  from: CardStatus[],
+  data: Prisma.CardUncheckedUpdateManyInput,
+  message: string,
+) {
+  const { count } = await client.card.updateMany({ where: { id: cardId, status: { in: from } }, data });
+  if (count !== 1) throw new AppError("INVALID_STATE", message);
+  return client.card.findUniqueOrThrow({ where: { id: cardId }, select: publicCard });
+}
+
 async function spentToday(client: Prisma.TransactionClient | typeof db, cardId: string, now = new Date()) {
   const agg = await client.transaction.aggregate({
     where: { cardId, type: "CARD_PAYMENT", status: "COMPLETED", createdAt: { gte: startOfDhakaDay(now) } },
@@ -107,12 +125,13 @@ export async function updateOwnCard(userId: string, cardId: string, input: { act
     if (card.status !== "ACTIVE" && card.status !== "FROZEN") throw new AppError("INVALID_STATE", "Limits can be set on issued cards only");
     const s = await getSettings();
     if (input.dailySpendLimit > s.dailyTransferLimit) throw new AppError("VALIDATION_ERROR", `The card limit can't exceed ${formatMoney(s.dailyTransferLimit)}`);
-    return db.card.update({ where: { id: cardId }, data: { dailySpendLimit: input.dailySpendLimit }, select: publicCard });
+    return transitionCard(db, cardId, ["ACTIVE", "FROZEN"], { dailySpendLimit: input.dailySpendLimit }, "Limits can be set on issued cards only");
   }
   const from: CardStatus = input.action === "freeze" ? "ACTIVE" : "FROZEN";
   const to: CardStatus = input.action === "freeze" ? "FROZEN" : "ACTIVE";
-  if (card.status !== from) throw new AppError("INVALID_STATE", input.action === "freeze" ? "Only active cards can be frozen" : "Only frozen cards can be unfrozen");
-  return db.card.update({ where: { id: cardId }, data: { status: to }, select: publicCard });
+  const message = input.action === "freeze" ? "Only active cards can be frozen" : "Only frozen cards can be unfrozen";
+  if (card.status !== from) throw new AppError("INVALID_STATE", message);
+  return transitionCard(db, cardId, [from], { status: to }, message);
 }
 
 /**
@@ -135,7 +154,10 @@ export async function payWithCard(user: SessionUser, cardId: string, input: { me
     out = await db.$transaction(async (tx): Promise<Out> => {
       await lockAccounts(tx, [card.accountId]);
       const again = await tx.transaction.findUnique({ where: { idempotencyKey: input.idempotencyKey } });
-      if (again) return { kind: "done", txn: again, balanceAfter: BigInt(-1) };
+      if (again) {
+        if (again.initiatedById !== user.id) throw new AppError("DUPLICATE_REQUEST", "This request was already processed");
+        return { kind: "done", txn: again, balanceAfter: BigInt(-1) };
+      }
 
       const c = await tx.card.findUniqueOrThrow({ where: { id: cardId } });
       if (c.status !== "ACTIVE") throw new AppError("CARD_INACTIVE", c.status === "FROZEN" ? "This card is frozen. Unfreeze it to pay." : "This card can't be used");
@@ -182,7 +204,10 @@ export async function payWithCard(user: SessionUser, cardId: string, input: { me
   } catch (err) {
     if (isUniqueViolation(err, "idempotencyKey")) {
       const winner = await db.transaction.findUnique({ where: { idempotencyKey: input.idempotencyKey } });
-      if (winner) return { replayed: true, transaction: winner };
+      if (winner) {
+        if (winner.initiatedById !== user.id) throw new AppError("DUPLICATE_REQUEST", "This request was already processed");
+        return { replayed: true, transaction: winner };
+      }
     }
     throw err;
   }
@@ -220,7 +245,7 @@ export async function reviewCard(actor: SessionUser, cardId: string, input: { ac
 
   if (input.action === "reject") {
     const updated = await db.$transaction(async (tx) => {
-      const c = await tx.card.update({ where: { id: cardId }, data: { status: "REJECTED", approvedById: actor.id }, select: publicCard });
+      const c = await transitionCard(tx, cardId, ["REQUESTED"], { status: "REJECTED", approvedById: actor.id }, "This card request was already decided");
       await writeAudit({ actorId: actor.id, action: "CARD_REJECTED", entity: "Card", entityId: cardId, metadata: { reason: input.reason } }, tx);
       return c;
     });
@@ -232,9 +257,11 @@ export async function reviewCard(actor: SessionUser, cardId: string, input: { ac
   const { masked, last4 } = generateMaskedNumber(card.network);
   const now = new Date();
   const updated = await db.$transaction(async (tx) => {
-    const c = await tx.card.update({
-      where: { id: cardId },
-      data: {
+    const c = await transitionCard(
+      tx,
+      cardId,
+      ["REQUESTED"],
+      {
         status: "ACTIVE",
         cardNumberMasked: masked,
         last4,
@@ -242,8 +269,8 @@ export async function reviewCard(actor: SessionUser, cardId: string, input: { ac
         expiryYear: now.getUTCFullYear() + CARD_VALID_YEARS,
         approvedById: actor.id,
       },
-      select: publicCard,
-    });
+      "This card request was already decided",
+    );
     await writeAudit({ actorId: actor.id, action: "CARD_APPROVED", entity: "Card", entityId: cardId, metadata: { last4, accountId: card.accountId } }, tx);
     return c;
   });
@@ -256,9 +283,10 @@ export async function setCardFrozenAsStaff(actor: SessionUser, cardId: string, f
   const card = await db.card.findUnique({ where: { id: cardId } });
   if (!card) throw new AppError("NOT_FOUND", "Card not found");
   assertNotSelf(actor.id, card.userId);
-  if (card.status !== (freeze ? "ACTIVE" : "FROZEN")) throw new AppError("INVALID_STATE", freeze ? "Only active cards can be frozen" : "Only frozen cards can be unfrozen");
+  const message = freeze ? "Only active cards can be frozen" : "Only frozen cards can be unfrozen";
+  if (card.status !== (freeze ? "ACTIVE" : "FROZEN")) throw new AppError("INVALID_STATE", message);
   return db.$transaction(async (tx) => {
-    const c = await tx.card.update({ where: { id: cardId }, data: { status: freeze ? "FROZEN" : "ACTIVE" }, select: publicCard });
+    const c = await transitionCard(tx, cardId, [freeze ? "ACTIVE" : "FROZEN"], { status: freeze ? "FROZEN" : "ACTIVE" }, message);
     await writeAudit({ actorId: actor.id, action: freeze ? "CARD_FROZEN" : "CARD_UNFROZEN", entity: "Card", entityId: cardId }, tx);
     return c;
   });
@@ -271,7 +299,7 @@ export async function blockCard(admin: SessionUser, cardId: string, reason: stri
   assertNotSelf(admin.id, card.userId);
   if (card.status !== "ACTIVE" && card.status !== "FROZEN") throw new AppError("INVALID_STATE", "Only issued cards can be blocked");
   const updated = await db.$transaction(async (tx) => {
-    const c = await tx.card.update({ where: { id: cardId }, data: { status: "BLOCKED" }, select: publicCard });
+    const c = await transitionCard(tx, cardId, ["ACTIVE", "FROZEN"], { status: "BLOCKED" }, "Only issued cards can be blocked");
     await writeAudit({ actorId: admin.id, action: "CARD_BLOCKED", entity: "Card", entityId: cardId, metadata: { reason } }, tx);
     return c;
   });

@@ -168,7 +168,10 @@ export async function repayNextInstallment(user: SessionUser, loanId: string, pi
   } catch (err) {
     if (isUniqueViolation(err, "idempotencyKey")) {
       const winner = await db.transaction.findUnique({ where: { idempotencyKey } });
-      if (winner) return { replayed: true, transaction: winner };
+      if (winner) {
+        if (winner.initiatedById !== user.id) throw new AppError("DUPLICATE_REQUEST", "This request was already processed");
+        return { replayed: true, transaction: winner };
+      }
     }
     throw err;
   }
